@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+   xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<meta th:name="viewport" content="width=device-width, initial-scale=1.0">
+<meta th:name="_csrf" th:content="${_csrf.token}"/>
+<meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+<title>로그인 페이지</title>
+<style type="text/css">
+li {
+   display: inline-block;
+}
+</style>
+</head>
+<body>
+
+	<h1>로그인 페이지</h1>
+
+	<!-- 에러 메시지 출력 -->
+	<h2 th:text="${errorMsg }"></h2>
+
+	<!-- 로그아웃 메시지 출력 -->
+	<h2 th:text="${logoutMsg }"></h2>
+
+	<!-- 로그인 폼 -->
+	<form th:action="@{/auth/login}" method="POST">
+	    <!-- 사용자명 입력 필드 -->
+	    <input type="text" th:name="username" ><br>
+	    <!-- 비밀번호 입력 필드 -->
+	    <input type="password" th:name="password" ><br>
+	    <!-- 로그인 버튼 -->
+	    <input type="submit" value="로그인">		
+	    <!-- CSRF 토큰 -->
+	    <input type="hidden" th:name="${_csrf.parameterName }" th:value="${_csrf.token }">
+	</form>
+
+</body>
+</html>
+
+
+

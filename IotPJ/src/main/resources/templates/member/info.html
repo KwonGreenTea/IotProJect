@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+   xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<meta th:name="viewport" content="width=device-width, initial-scale=1.0">
+<meta th:name="_csrf" th:content="${_csrf.token}"/>
+<meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js">
+</script>
+<title>회원 정보</title>
+</head>
+<body>
+	<header>
+    	<a th:href="@{/board/list}">메인</a>
+  	</header>
+	<p>아이디 : <span th:text="${memberDTO.memberId }"></span></p>
+	<p>회원 이름 : <span th:text="${memberDTO.memberName }"></span></p>
+	<p>회원 등록일 : <span th:text="${memberDTO.regDate }"></span></p>
+
+	<button id="modifyMember">정보 수정</button>
+	<button id="deleteMember">회원 탈퇴</button>		
+
+	<form id="deleteForm" th:action="@{delete}" method="POST">
+    	<input type="hidden" th:name="${_csrf.parameterName }" th:value="${_csrf.token }">
+	</form>
+	
+	<script type="text/javascript">
+	$(document).ready(function(){
+		
+		$("#modifyMember").click(function(){
+			window.location.href = 'modify'; // /member/modify url로 이동
+		}); // end click()
+		
+		$('#deleteMember').click(function(){
+			if(confirm('탈퇴하시겠습니까?')) {
+				var deleteForm = $("#deleteForm"); // form 객체 참조
+				deleteForm.submit(); // form 전송
+			}
+		}); // end click()
+	});
+
+	</script>
+</body>
+</html>

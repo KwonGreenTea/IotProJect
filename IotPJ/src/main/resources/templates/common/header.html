@@ -1,0 +1,18 @@
+<header>
+	<div class="header-container">
+		<a th:href="@{/board/list}">메인</a>
+		<div class="header-section">
+			<div sec:authorize="isAuthenticated()">
+				<p><a th:href="@{/member/info}"><span sec:authentication="name"></span></a>님</p>
+				<form th:action="@{/auth/logout}" method="post">
+				    <input type="submit" value="로그아웃">
+				    <input type="hidden" th:name="${_csrf.parameterName }" th:value="${_csrf.token }">
+				</form>
+			</div>		
+			<div sec:authorize="isAnonymous()">	
+				<a th:href="@{/member/join}">회원 가입</a>
+				<a th:href="@{/auth/login}">로그인</a>
+			</div>
+		</div>
+	</div>
+</header>
