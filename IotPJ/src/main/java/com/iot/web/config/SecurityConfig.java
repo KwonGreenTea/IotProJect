@@ -20,24 +20,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/", "/home").permitAll()
-                .requestMatchers("/board/register").hasRole("MEMBER")
-                .requestMatchers("/member/info").hasRole("MEMBER")
-                .requestMatchers("/member/modify").hasRole("MEMBER")
-                .anyRequest().permitAll()
-            )
-            .formLogin((form) -> form
-                .loginPage("/auth/login")
-                .defaultSuccessUrl("/board/list")
-                .permitAll()
-            )
-            .logout((logout) -> logout
-            		.logoutUrl("/auth/logout")
-            		.logoutSuccessUrl("/board/list")
-            		.invalidateHttpSession(true)
-            		.deleteCookies("JSESSIONID"));
+    	 http
+	         .csrf(csrf -> csrf.disable())
+	         .authorizeHttpRequests(authz -> authz
+	             .requestMatchers("/api/data").permitAll()
+	             .anyRequest().authenticated()
+	         );
 
         return http.build();
     }
