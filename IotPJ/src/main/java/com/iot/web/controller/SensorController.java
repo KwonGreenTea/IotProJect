@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -22,6 +25,8 @@ public class SensorController {
 	@Autowired
 	private TestService testService;
 	
+	private static final String API_KEY = "1234567890abcdef";
+	
 	// SSE 통신 방식
 	private final SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
 
@@ -31,9 +36,15 @@ public class SensorController {
     }
 
     // 데이터 수신 시마다 웹으로 푸시
-    @GetMapping("/api/data")
-    public ResponseEntity<String> receiveDataPost(@RequestBody Map<String, Object> jsonData) {
+    @PostMapping("/api/data")
+    public ResponseEntity<String> receiveDataPost(
+    		@RequestHeader(value = "x-api-key", required = false) String apiKey,
+    		@RequestBody Map<String, Object> jsonData) {
     	log.info("receiveDataPost()");
+    	
+    	if (!API_KEY.equals(apiKey)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid API Key");
+        }
 		
 		TestDTO testDTO = new TestDTO();
 		
