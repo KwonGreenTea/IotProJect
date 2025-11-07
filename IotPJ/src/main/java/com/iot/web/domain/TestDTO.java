@@ -12,8 +12,9 @@ import lombok.ToString;
 public class TestDTO {
 
 	private int dataCd; 
-	private Double data1; // DATA1
-	private Double data2; // DATA2
-	private Double data3; // DATA3
+	private String data1; // DATA1
+	private String data2; // DATA2
+	private String data3; // DATA3
+	private String sensorCd;
 	
 } // end BoardDTO

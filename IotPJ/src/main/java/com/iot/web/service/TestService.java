@@ -1,9 +1,9 @@
 package com.iot.web.service;
 
-import java.util.List;
-
-import com.iot.web.domain.Test;
+import com.iot.web.domain.TestDTO;
 
 public interface TestService {
-	List<Test> retrieveAllData();
+	TestDTO retrieveAllData();
+
+	void insertData(TestDTO testDTO);
 }

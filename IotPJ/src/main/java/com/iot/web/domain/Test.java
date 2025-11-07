@@ -18,7 +18,8 @@ public class Test {
     @SequenceGenerator(name = "TEST_SEQ", sequenceName = "TEST_DATA_SEQ", allocationSize = 1)
     private int dataCd;
 
-    private Double data1;
-    private Double data2;
-    private Double data3;
+    private String data1;
+    private String data2;
+    private String data3;
+    private String sensorCd;
 }
