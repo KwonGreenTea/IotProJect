@@ -75,20 +75,26 @@
 			<artifactId>ojdbc11</artifactId>
 			<version>23.2.0.0</version>
 		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.oracle.database.security/oraclepki -->
 		<dependency>
 			<groupId>com.oracle.database.security</groupId>
 			<artifactId>oraclepki</artifactId>
-			<version>21.5.0.0</version>
+			<version>21.5.0.0</version> <!-- 해당 버전을 명시 -->
 		</dependency>
-		<dependency>
-			<groupId>com.oracle.database.security</groupId>
-			<artifactId>osdt_core</artifactId>
-			<version>21.5.0.0</version>
-		</dependency>
+
+		<!-- OSDT Cert -->
 		<dependency>
 			<groupId>com.oracle.database.security</groupId>
 			<artifactId>osdt_cert</artifactId>
-			<version>21.5.0.0</version>
+			<version>21.5.0.0</version> <!-- 명시된 최신 버전 -->
+		</dependency>
+
+		<!-- OSDT Core -->
+		<dependency>
+			<groupId>com.oracle.database.security</groupId>
+			<artifactId>osdt_core</artifactId>
+			<version>21.5.0.0</version> <!-- 명시된 최신 버전 -->
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
