@@ -27,22 +27,22 @@
 	</table>
 
 	<script>
-	const eventSource = new EventSource("/data/stream");
-
-	eventSource.addEventListener("newData", function(event) {
-	    const data = JSON.parse(event.data);
-	    const tbody = document.querySelector('#sensorTable tbody');
-	    const newRow = `
-	        <tr>
-	            <td>NEW</td>
-	            <td>${data.data1}</td>
-	            <td>${data.data2}</td>
-	            <td>${data.data3}</td>
-	            <td>${data.sensorCd}</td>
-	        </tr>
-	    `;
-	    tbody.innerHTML = newRow + tbody.innerHTML; // 위로 추가
-	});
+		const eventSource = new EventSource("/data/stream");
+	
+		eventSource.addEventListener("newData", function(event) {
+		    const data = JSON.parse(event.data);
+		    const tbody = document.querySelector('#sensorTable tbody');
+		    const newRow = `
+		        <tr>
+		            <td>NEW</td>
+		            <td>${data.data1}</td>
+		            <td>${data.data2}</td>
+		            <td>${data.data3}</td>
+		            <td>${data.sensorCd}</td>
+		        </tr>
+		    `;
+		    tbody.innerHTML = newRow + tbody.innerHTML; // 위로 추가
+		});
 	</script>
 
 </body>

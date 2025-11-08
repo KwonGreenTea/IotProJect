@@ -2,6 +2,7 @@ package com.iot.web.controller;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,10 +29,24 @@ public class SensorController {
 	private static final String API_KEY = "1234567890abcdef";
 	
 	// SSE 통신 방식
-	private final SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+	private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 
+	// 클라이언트별로 emitter 등록
     @GetMapping("/data/stream")
-    public SseEmitter stream() {
+    public SseEmitter stream(@RequestHeader(value = "Client-Id", required = false) String clientId) {
+        if (clientId == null || clientId.isEmpty()) {
+            clientId = "default-" + System.currentTimeMillis();
+        }
+
+        final String finalClientId = clientId; 
+
+        SseEmitter emitter = new SseEmitter(0L);
+        emitters.put(finalClientId, emitter);
+
+        emitter.onCompletion(() -> emitters.remove(finalClientId));
+        emitter.onTimeout(() -> emitters.remove(finalClientId));
+        emitter.onError(e -> emitters.remove(finalClientId));
+
         return emitter;
     }
 
@@ -55,11 +70,15 @@ public class SensorController {
         
         testService.insertData(testDTO);
 
-        try {
-            emitter.send(SseEmitter.event().name("newData").data(testDTO));
-        } catch (IOException e) {
-            emitter.completeWithError(e);
-        }
+        // 모든 연결된 클라이언트에 이벤트 전송
+        emitters.forEach((id, emitter) -> {
+            try {
+                emitter.send(SseEmitter.event().name("newData").data(testDTO));
+            } catch (IOException e) {
+                emitter.completeWithError(e);
+                emitters.remove(id);
+            }
+        });
 
         return ResponseEntity.ok("저장 및 전송 완료");
     }
