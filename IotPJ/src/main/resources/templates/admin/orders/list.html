@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>구매자 리스트</title>
+  <link rel="stylesheet" href="/css/base.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="h1">구매자 리스트</div>
+      <a class="btn ghost right" href="/orders">사용자 주문 보기</a>
+    </div>
+
+    <div class="card">
+      <div class="row" style="gap:8px">
+        <select id="status">
+          <option value="">상태 전체</option>
+          <option>배송 전</option>
+          <option>배송 시작</option>
+          <option>배송 완료</option>
+        </select>
+        <input id="q" placeholder="고객명/주문번호 검색" style="flex:1;min-width:160px;padding:8px;border-radius:8px;border:1px solid #2e313a;background:#0f1116;color:#e8e8ea">
+        <button class="btn" id="search">검색</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <table class="table" id="tbl">
+        <thead>
+          <tr><th>주문번호</th><th>고객명</th><th>주문시간</th><th>상태</th><th>합계</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module" src="/js/pages/adminOrders.js"></script>
+</body>
+</html>

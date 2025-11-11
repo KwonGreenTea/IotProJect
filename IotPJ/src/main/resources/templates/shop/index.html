@@ -1,0 +1,27 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <title>Shop | 상품 목록</title>
+  <link rel="stylesheet" href="/css/shop.css" />
+  <script type="module">
+    import { fetchProducts, renderList } from "/js/shop.js";
+    window.addEventListener('DOMContentLoaded', async ()=>{
+      const listEl = document.querySelector('#list');
+      const products = await fetchProducts();
+      renderList(products, listEl);
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>상품 목록</h1>
+      <div class="toolbar">
+        <a class="btn secondary" href="/cart">장바구니</a>
+      </div>
+    </div>
+    <div id="list" class="grid"></div>
+  </div>
+</body>
+</html>

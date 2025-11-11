@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>상품 등록</title>
+  <link rel="stylesheet" href="/css/base.css">
+</head>
+<body class="container">
+  <h1>상품 등록</h1>
+
+  <form id="productForm" class="card" style="max-width:760px">
+    <div class="row">
+      <label>상품명</label>
+      <input type="text" name="name" required placeholder="예) 텀블러 500ml">
+    </div>
+
+    <div class="row">
+      <label>SKU (선택)</label>
+      <input type="text" name="sku" placeholder="고유 식별자(미입력시 자동 생성)">
+    </div>
+
+    <div class="row">
+      <label>가격(원)</label>
+      <input type="number" name="price" required min="0" step="100">
+    </div>
+
+    <div class="row">
+      <label>제품 설명</label>
+      <textarea name="description" rows="4" placeholder="간단한 설명"></textarea>
+    </div>
+
+    <fieldset class="row">
+      <legend>온도 임계치(℃)</legend>
+      <div class="grid-2">
+        <div><label>최소</label><input type="number" name="tempMin" step="0.1" placeholder="예: 2.0"></div>
+        <div><label>최대</label><input type="number" name="tempMax" step="0.1" placeholder="예: 8.0"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="row">
+      <legend>습도 임계치(%)</legend>
+      <div class="grid-2">
+        <div><label>최소</label><input type="number" name="humidMin" step="1" placeholder="예: 30"></div>
+        <div><label>최대</label><input type="number" name="humidMax" step="1" placeholder="예: 70"></div>
+      </div>
+    </fieldset>
+
+    <div class="row">
+      <button type="submit" class="primary">등록</button>
+      <a href="/admin/products" class="ghost">목록</a>
+    </div>
+    <div id="msg" class="muted"></div>
+  </form>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/pages/adminProductNew.js"></script>
+</body>
+</html>

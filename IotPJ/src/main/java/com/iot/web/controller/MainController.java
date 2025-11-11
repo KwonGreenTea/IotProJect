@@ -9,9 +9,8 @@ import lombok.extern.log4j.Log4j2;
 @Controller
 @Log4j2
 public class MainController {
-	
-	@GetMapping("/")
-	public String main(RedirectAttributes reAttr) {
-		return "redirect:/user/prod/info";
-	}
+	/*
+	 * @GetMapping("/") public String main(RedirectAttributes reAttr) { return
+	 * "redirect:/user/prod/info"; }
+	 */
 }

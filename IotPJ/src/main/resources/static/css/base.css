@@ -1,0 +1,23 @@
+:root { --bg:#0b0c10; --card:#15171c; --txt:#e8e8ea; --muted:#a9a9b2; --brand:#69e1ff; }
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,Apple SD Gothic Neo,Pretendard,sans-serif;background:var(--bg);color:var(--txt)}
+a{color:inherit}
+.container{max-width:1000px;margin:24px auto;padding:0 16px}
+.card{background:var(--card);border:1px solid #23262e;border-radius:14px;padding:16px;margin:12px 0}
+.h1{font-size:24px;font-weight:700;margin:6px 0 12px}
+.h2{font-size:18px;font-weight:700;margin:0 0 10px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.right{margin-left:auto}
+.btn{border:1px solid #2e313a;background:#1b1e26;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
+.btn.primary{border-color:#3b97b1;background:#175464}
+.btn.ghost{background:transparent}
+.badge{display:inline-block;padding:3px 8px;border:1px solid #2e313a;border-radius:999px;color:var(--muted);font-size:12px}
+.small{font-size:12px;color:var(--muted)}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid #262933;text-align:left}
+.list a{display:block;padding:12px 10px;border:1px solid #262933;border-radius:12px;text-decoration:none;color:var(--txt)}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 12px}
+.kv .v{font-weight:600}
+.sensor{display:flex;gap:12px;align-items:center}
+.sensor .chip{border:1px solid #2b2f38;border-radius:10px;padding:8px 10px}
+.toast{position:fixed;right:16px;bottom:16px;background:#1b1e26;border:1px solid #2e313a;border-radius:10px;padding:12px 14px}
