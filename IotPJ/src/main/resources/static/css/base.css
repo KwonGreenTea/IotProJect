@@ -633,3 +633,40 @@ small.mono {
     justify-content: center;
   }
 }
+
+/* 페이지 헤더 액션 버튼 묶음 */
+.page-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 빈 상태 표시 (상품 없음 등) */
+.empty-state {
+  padding: 18px 10px;
+  text-align: center;
+  color: #c0c2d4;
+  font-size: 13px;
+}
+
+.empty-title {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.empty-desc {
+  margin: 0;
+  font-size: 12px;
+  color: #9598ad;
+}
+
+/* 인라인 링크 (테이블 안) */
+.link-inline {
+  font-size: 12px;
+  color: #4b8bff;
+  text-decoration: none;
+}
+
+.link-inline:hover {
+  text-decoration: underline;
+}
