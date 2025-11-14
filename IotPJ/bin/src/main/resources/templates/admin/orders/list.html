@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>구매자 리스트</title>
+  <link rel="stylesheet" href="/css/base.css"/>
+</head>
+<body class="app-body">
+  <div class="app-shell">
+    <!-- 상단 헤더 -->
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">구매자 리스트</h1>
+        <p class="page-subtitle">고객 주문 현황을 한눈에 확인하고 관리하세요.</p>
+      </div>
+      <!-- 필요하면 오른쪽에 나중에 버튼/필터 추가 가능 -->
+      <!-- <div class="page-header-actions">...</div> -->
+    </header>
+
+    <!-- 필터 카드 -->
+    <section class="card card--filter">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label for="status" class="filter-label">주문 상태</label>
+          <select id="status" class="select">
+            <option value="">상태 전체</option>
+            <option>배송 전</option>
+            <option>배송 시작</option>
+            <option>배송 완료</option>
+          </select>
+        </div>
+
+        <div class="filter-group filter-group--grow">
+          <label for="q" class="filter-label">검색</label>
+          <div class="input-with-icon">
+            <span class="input-icon">🔍</span>
+            <input
+              id="q"
+              class="input"
+              placeholder="고객명 / 주문번호 검색"
+            />
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="search">검색</button>
+      </div>
+    </section>
+
+    <!-- 테이블 카드 -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">주문 목록</h2>
+          <p class="card-subtitle">필터와 검색으로 원하는 주문을 빠르게 찾아보세요.</p>
+        </div>
+        <!-- 필요하면 주문 건수 표시용 span 추가 가능 -->
+        <!-- <span class="badge">총 12건</span> -->
+      </div>
+
+      <div class="table-wrapper">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th>주문번호</th>
+              <th>고객명</th>
+              <th>주문시간</th>
+              <th>상태</th>
+              <th>합계</th>
+              <th class="th-actions">액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- JS에서 렌더링 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="/js/pages/adminOrders.js"></script>
+</body>
+</html>

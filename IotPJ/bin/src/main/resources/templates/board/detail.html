@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+   xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<meta th:name="viewport" content="width=device-width, initial-scale=1.0">
+<meta th:name="_csrf" th:content="${_csrf.token}"/>
+<meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- css 파일 불러오기 -->
+<link rel="stylesheet" th:href="@{/css/image.css}">
+<link rel="stylesheet" th:href="@{/css/attach.css}">
+	
+<style type="text/css">
+li {
+	display: inline-block;
+}
+</style>
+<title th:text="${boardDTO.boardTitle }"></title>
+</head>
+<body>
+
+   <div th:include="common/header.html"></div>
+	<h2>글 보기 페이지</h2>
+	<div>
+		<p>글 번호 : <span th:text="${boardDTO.boardId }"></span></p>
+	</div>
+	<div>
+		<p>제목 : </p>
+		<p><span th:text="${boardDTO.boardTitle }"></span></p>
+	</div>
+	<div>
+		<p>작성자 : <span th:text="${boardDTO.memberId }"></span></p>
+		<p>작성일 : <span th:text="${boardDTO.boardDateCreated }"></span></p>
+	</div>
+	<div>
+		<textarea rows="20" cols="120" readonly th:text="${boardDTO.boardContent }"></textarea>
+	</div>
+
+	<form id="listForm" th:action="@{list}" method="GET">
+		<input type="hidden" th:name="number" th:value="${paginator.number}">
+    	<input type="hidden" th:name="size" th:value="${paginator.size}">
+		<input type="hidden" th:name="type" th:value="${paginator.type}">
+		<input type="hidden" th:name="keyword" th:value="${paginator.keyword}">
+		<input type="submit" value="글 목록">
+	</form>
+	
+	<div th:if="${boardDTO.memberId == #authentication.name}">
+		<button id="modifyBoard">글 수정</button>
+		<button id="deleteBoard">글 삭제</button>
+	</div>
+	
+	<form id="modifyForm" th:action="@{modify}" method="GET">
+		<input type="hidden" th:name="boardId" th:value="${boardDTO.boardId}">
+		<input type="hidden" th:name="number" th:value="${paginator.number}">
+		<input type="hidden" th:name="size" th:value="${paginator.size}">
+		<input type="hidden" th:name="type" th:value="${paginator.type}">
+		<input type="hidden" th:name="keyword" th:value="${paginator.keyword}">
+	</form>
+	<form id="deleteForm" th:action="@{delete}" method="POST">
+		<input type="hidden" th:name="boardId" th:value="${boardDTO.boardId}">
+		<input type="hidden" th:name="number" th:value="${paginator.number}">
+		<input type="hidden" th:name="size" th:value="${paginator.size}">
+		<input type="hidden" th:name="type" th:value="${paginator.type}">
+		<input type="hidden" th:name="keyword" th:value="${paginator.keyword}">
+    	<input type="hidden" th:name="memberId" th:value="${boardDTO.memberId}">
+    	<input type="hidden" th:name="${_csrf.parameterName }" th:value="${_csrf.token }">
+	</form>
+	
+	<!-- 이미지 파일 영역 -->
+	<div class="image-upload">
+		<div class="image-view">
+			<h2>이미지 파일 리스트</h2>
+			<div class="image-list" th:each="attachDTO : ${boardDTO.attachList}">
+		        <div class="image_item" th:if="${attachDTO.attachExtension eq 'jpg' or 
+								    			  attachDTO.attachExtension eq 'jpeg' or 
+								    			  attachDTO.attachExtension eq 'png' or 
+								    			  attachDTO.attachExtension eq 'gif'}">
+		        	<a th:href="@{/image/get(attachId=${attachDTO.attachId })}" target="_blank">
+			        <img width="100px" height="100px" 
+			        th:src="@{/image/get(attachId=${attachDTO.attachId }, attachExtension=${attachDTO.attachExtension})}"/></a>
+		        </div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 첨부 파일 영역 -->
+	<div class="attach-upload">
+		<div class="attach-view">
+			<h2>첨부 파일 리스트</h2>
+			<div class="attach-list" th:each="attachDTO : ${boardDTO.attachList}">
+		    	<div class="attach_item" th:if="${not (attachDTO.attachExtension eq 'jpg' or 
+								    			  attachDTO.attachExtension eq 'jpeg' or 
+								    			  attachDTO.attachExtension eq 'png' or 
+								    			  attachDTO.attachExtension eq 'gif')}">
+			    	<p><a th:href="@{/attach/download(attachId=${attachDTO.attachId })}"><span th:text="${attachDTO.attachRealName }"></span>.<span th:text="${attachDTO.attachExtension }"></span></a></p>
+		    	</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 댓글 영역 -->
+	<input type="hidden" id="boardId" th:value="${boardDTO.boardId }">
+	
+	<h2>댓글 작성</h2>
+	<div sec:authorize="isAnonymous()">
+		* 댓글을 작성하려면 로그인해 주세요.
+	</div>
+	<div sec:authorize="isAuthenticated()">
+		<div style="text-align: center;">
+			<p><span sec:authentication="name"></span></p>
+			<input type="hidden" id="memberId" th:value="${#authentication.name }">
+			<input type="text" id="replyContent" maxlength="150">
+			<button id="btnAdd">작성</button>
+		</div>	
+	</div>
+	
+
+	<hr>
+	<div style="text-align: center;">
+		<div id="replies"></div>
+	</div>
+	
+	<div th:include="common/footer.html"></div>
+	<script th:src="@{/js/reply.js}"></script>
+	<script>
+	
+	$(document).ajaxSend(function(e, xhr, opt){
+		var token = $("meta[name='_csrf']").attr("content");
+		var header = $("meta[name='_csrf_header']").attr("content");
+		
+		xhr.setRequestHeader(header, token);
+	});
+	
+	$(document).ready(function(){		
+		$("#modifyBoard").click(function(){
+			var modifyForm = $("#modifyForm"); // form 객체 참조
+			
+			modifyForm.submit(); // form 전송
+		}); // end click()
+		
+		$('#deleteBoard').click(function(){
+			if(confirm('삭제하시겠습니까?')) {
+				var deleteForm = $("#deleteForm"); // form 객체 참조
+				
+				deleteForm.submit(); // form 전송
+			}
+		}); // end click()
+	});
+
+	</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
