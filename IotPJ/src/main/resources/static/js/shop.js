@@ -3,40 +3,24 @@ const CART_KEY = "cart";
 const getCart = () => JSON.parse(localStorage.getItem(CART_KEY) || "[]");
 const setCart = (c) => localStorage.setItem(CART_KEY, JSON.stringify(c));
 
-// ✅ DTO 그대로 받아서 화면용으로 변환
 export async function fetchProducts() {
-  const res = await fetch("/api/products"); // 실제 백엔드 API
-  const dtoList = await res.json();
-
-  // ProductInfoDTO → 화면용 객체 매핑
-  return dtoList.map(dto => ({
-    id: dto.productId,
-    name: dto.productName,
-    price: dto.price,
-    thresholdTemp: dto.minTemperature != null && dto.maxTemperature != null
-      ? `${dto.minTemperature}~${dto.maxTemperature}` 
-      : '-',
-    thresholdHumid: dto.minHumidity != null && dto.maxHumidity != null
-      ? `${dto.minHumidity}~${dto.maxHumidity}`
-      : '-'
-  }));
+  const res = await fetch("/mock/products");
+  return await res.json();
 }
 
-// 장바구니 추가
 export function addToCart(item) {
   const cart = getCart();
-  const idx = cart.findIndex(c => c.id === item.id);
+  const idx = cart.findIndex((c) => c.id === item.id);
   if (idx >= 0) cart[idx].qty += item.qty || 1;
   else cart.push({ id: item.id, name: item.name, price: item.price, qty: item.qty || 1 });
   setCart(cart);
   alert("장바구니에 담았습니다.");
 }
 
-// 목록 화면 렌더링
 export function renderList(products, el) {
   el.innerHTML = products.map(p => `
     <div class="card">
-      <span class="badge">임계 T/H: ${p.thresholdTemp}℃ / ${p.thresholdHumid}%</span>
+      <span class="badge">임계 T/H: ${p.thresholdTemp ?? '-'}℃ / ${p.thresholdHumid ?? '-'}%</span>
       <h3><a href="/shop/${p.id}">${p.name}</a></h3>
       <div class="price">${Number(p.price||0).toLocaleString()}원</div>
       <div class="toolbar">
@@ -48,19 +32,19 @@ export function renderList(products, el) {
 
   el.querySelectorAll("button[data-id]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const p = products.find(pp => pp.id === Number(btn.dataset.id));
+      const p = products.find(pp => pp.id === btn.dataset.id);
       addToCart({ id: p.id, name: p.name, price: p.price, qty: 1 });
     });
   });
 }
 
-// 상세 화면 렌더링
-export function renderDetail(dto, root) {
+export function renderDetail(product, root) {
   root.innerHTML = `
     <div class="card">
-      <div class="badge">임계 T/H: ${dto.minTemperature != null && dto.maxTemperature != null ? dto.minTemperature + '~' + dto.maxTemperature : '-'}℃ / ${dto.minHumidity != null && dto.maxHumidity != null ? dto.minHumidity + '~' + dto.maxHumidity : '-'}%</div>
-      <h2>${dto.productName}</h2>
-      <p class="price">${Number(dto.price||0).toLocaleString()}원</p>
+      <div class="badge">임계 T/H: ${product.thresholdTemp ?? '-'}℃ / ${product.thresholdHumid ?? '-'}%</div>
+      <h2>${product.name}</h2>
+      <p>${product.description || ""}</p>
+      <p class="price">${Number(product.price||0).toLocaleString()}원</p>
       <div class="toolbar">
         <input id="qty" type="number" value="1" min="1" style="width:80px;padding:8px;border:1px solid #ddd;border-radius:8px;">
         <button class="btn" id="add">장바구니 담기</button>
@@ -68,14 +52,8 @@ export function renderDetail(dto, root) {
       </div>
     </div>
   `;
-
   root.querySelector("#add").onclick = () => {
     const qty = Math.max(1, parseInt(root.querySelector("#qty").value||"1", 10));
-    addToCart({ 
-      id: dto.productId, 
-      name: dto.productName, 
-      price: dto.price, 
-      qty 
-    });
+    addToCart({ id: product.id, name: product.name, price: product.price, qty });
   };
 }
