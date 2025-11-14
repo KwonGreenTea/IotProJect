@@ -14,8 +14,6 @@
         <h1 class="page-title">구매자 리스트</h1>
         <p class="page-subtitle">고객 주문 현황을 한눈에 확인하고 관리하세요.</p>
       </div>
-      <!-- 필요하면 오른쪽에 나중에 버튼/필터 추가 가능 -->
-      <!-- <div class="page-header-actions">...</div> -->
     </header>
 
     <!-- 필터 카드 -->
@@ -38,7 +36,7 @@
             <input
               id="q"
               class="input"
-              placeholder="고객명 / 주문번호 검색"
+              placeholder="사용자 ID / 주문번호 검색"
             />
           </div>
         </div>
@@ -54,8 +52,6 @@
           <h2 class="card-title">주문 목록</h2>
           <p class="card-subtitle">필터와 검색으로 원하는 주문을 빠르게 찾아보세요.</p>
         </div>
-        <!-- 필요하면 주문 건수 표시용 span 추가 가능 -->
-        <!-- <span class="badge">총 12건</span> -->
       </div>
 
       <div class="table-wrapper">
@@ -63,7 +59,7 @@
           <thead>
             <tr>
               <th>주문번호</th>
-              <th>고객명</th>
+              <th>사용자 ID</th> <!-- 수정됨 -->
               <th>주문시간</th>
               <th>상태</th>
               <th>합계</th>

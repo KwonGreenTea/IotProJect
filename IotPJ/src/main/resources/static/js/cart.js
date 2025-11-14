@@ -77,14 +77,64 @@ export function renderCart(root) {
       };
     });
 
+    // ✅ 여기부터 주문 생성(컨트롤러 만들면 그대로 붙일 부분)
     root.querySelector("#checkout").onclick = async () => {
-      // ⚠️ 실제 주문 API 연동 시 이 부분만 바꾸면 됨.
-      // 예: POST /api/orders  (팀에서 정한 DTO에 맞게 body 구성)
-      // 여기서는 데모로 주문 성공 처리만.
-      alert("주문이 접수되었습니다. (데모)");
-      setCart([]);
-      draw();
-      // 주문 후 사용자 주문내역으로 이동하려면: location.href = "/orders";
+      if (cart.length === 0) {
+        alert("장바구니가 비어 있습니다.");
+        return;
+      }
+
+      // 나중에 로그인 붙으면 userId는 서버에서 읽도록 바꿀 수 있음
+      const userId = prompt("주문자 ID를 입력해주세요.", "demo-user") || "demo-user";
+
+      // OrderInfoDTO는 '요약 정보'라서,
+      // 요청 바디에는 userId + items + totalPrice 를 보내고
+      // 응답으로 OrderInfoDTO를 받는다고 가정.
+      const payload = {
+        userId,
+        totalPrice: total,
+        items: cart.map(c => ({
+          productId: c.id,
+          name: c.name,
+          unitPrice: c.price,
+          quantity: c.qty,
+        })),
+      };
+
+      try {
+        // 컨트롤러 만들 때 이 URL과 요청/응답 구조만 맞춰주면 됨.
+        const res = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("주문 실패 status:", res.status, text);
+          alert("주문 처리 중 오류가 발생했습니다.");
+          return;
+        }
+
+        // 🎯 응답: OrderInfoDTO
+        const order = await res.json();
+        // order: { orderId, productId, sellerId, userId, deliveryId, orderedAt, totalPrice }
+
+        alert(
+          `주문이 접수되었습니다.\n` +
+          `주문번호: ${order.orderId ?? "(알 수 없음)"}\n` +
+          `주문일시: ${order.orderedAt ?? ""}\n` +
+          `총 금액: ${fmt(order.totalPrice ?? total)}원`
+        );
+
+        setCart([]);
+        draw();
+        // 나중에 주문 내역 페이지 만들면 주석 해제
+        // location.href = "/orders";
+      } catch (err) {
+        console.error("주문 요청 오류:", err);
+        alert("주문 요청에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      }
     };
   };
   draw();
