@@ -1,27 +1,49 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Shop | 상품 목록</title>
   <link rel="stylesheet" href="/css/shop.css" />
   <script type="module">
     import { fetchProducts, renderList } from "/js/shop.js";
-    window.addEventListener('DOMContentLoaded', async ()=>{
+
+    window.addEventListener('DOMContentLoaded', async () => {
       const listEl = document.querySelector('#list');
       const products = await fetchProducts();
       renderList(products, listEl);
     });
   </script>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>상품 목록</h1>
-      <div class="toolbar">
+<body class="shop-body">
+  <div class="shop-shell">
+
+    <!-- 상단 헤더 -->
+    <header class="shop-header">
+      <div class="shop-header-main">
+        <h1 class="shop-title">상품 목록</h1>
+        <p class="shop-subtitle">
+          등록된 상품을 둘러보고 원하는 상품을 장바구니에 담아보세요.
+        </p>
+      </div>
+      <div class="shop-toolbar">
         <a class="btn secondary" href="/cart">장바구니</a>
       </div>
-    </div>
-    <div id="list" class="grid"></div>
+    </header>
+
+    <!-- 상품 리스트 -->
+    <section class="shop-card">
+      <div class="shop-card-header">
+        <h2 class="shop-section-title">전체 상품</h2>
+        <p class="shop-section-subtitle">
+          센서 모니터링이 가능한 상품들을 확인할 수 있습니다.
+        </p>
+      </div>
+
+      <!-- JS에서 카드 리스트 렌더링 -->
+      <div id="list" class="grid product-grid"></div>
+    </section>
+
   </div>
 </body>
 </html>

@@ -1,32 +1,49 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>상품 상세</title>
   <link rel="stylesheet" href="/css/shop.css" />
   <script type="module">
     import { fetchProducts, renderDetail } from "/js/shop.js";
-    window.addEventListener('DOMContentLoaded', async ()=>{
+
+    window.addEventListener('DOMContentLoaded', async () => {
       // URL에서 /shop/{id} 의 {id} 추출
       const id = location.pathname.split('/').pop();
       const products = await fetchProducts();
-      const product = products.find(p=> String(p.id) === id);
+      const product = products.find(p => String(p.id) === id);
       const root = document.querySelector('#detail');
-      if(!product){ root.innerHTML = "<p>상품을 찾을 수 없습니다.</p>"; return; }
+
+      if (!product) {
+        root.innerHTML = "<p>상품을 찾을 수 없습니다.</p>";
+        return;
+      }
       renderDetail(product, root);
     });
   </script>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>상품 상세</h1>
-      <div class="toolbar">
+<body class="shop-body">
+  <div class="shop-shell">
+
+    <!-- 상단 헤더 -->
+    <header class="shop-header">
+      <div class="shop-header-main">
+        <h1 class="shop-title">상품 상세</h1>
+        <p class="shop-subtitle">
+          상품 정보를 확인하고 장바구니에 담아 주문을 진행하세요.
+        </p>
+      </div>
+      <div class="shop-toolbar">
         <a class="btn secondary" href="/shop">목록</a>
         <a class="btn secondary" href="/cart">장바구니</a>
       </div>
-    </div>
-    <div id="detail"></div>
+    </header>
+
+    <!-- 상세 영역 (JS에서 렌더링) -->
+    <section class="shop-card product-detail-card">
+      <div id="detail" class="product-detail-root"></div>
+    </section>
   </div>
 </body>
 </html>

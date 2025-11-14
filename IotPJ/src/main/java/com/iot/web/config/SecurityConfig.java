@@ -25,6 +25,7 @@ public class SecurityConfig {
 	         .authorizeHttpRequests(authz -> authz
 	        	 .requestMatchers("/", "/home").permitAll()
 	             .requestMatchers("/api/data").permitAll()
+	             .requestMatchers("/mock/**").permitAll()
 	             .anyRequest().permitAll()
 	         );
 
