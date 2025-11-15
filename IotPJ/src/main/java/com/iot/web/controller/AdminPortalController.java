@@ -1,12 +1,25 @@
 package com.iot.web.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.iot.web.domain.OrderInfoDTO;
+import com.iot.web.service.AdminService;
+
+import lombok.extern.log4j.Log4j2;
+
 @Controller
+@Log4j2
 public class AdminPortalController {
 
+	@Autowired
+	private AdminService adminService;
+	
     /** 운영자 홈 */
     @GetMapping({"/admin", "/admin/home"})
     public String adminHome() {
@@ -16,7 +29,15 @@ public class AdminPortalController {
 
     /** 운영자 주문 목록 */
     @GetMapping("/admin/orders")
-    public String adminOrders() {
+    public String adminOrders(Model model) {
+    	List<OrderInfoDTO> orderList = adminService.retrieveOrderData();
+    	
+    	for(OrderInfoDTO tempDTO : orderList) {
+    		log.info(tempDTO);
+    	}
+    	
+    	model.addAttribute("orderList", orderList);
+    	
         // templates/admin/orders/list.html
         return "admin/orders/list";
     }

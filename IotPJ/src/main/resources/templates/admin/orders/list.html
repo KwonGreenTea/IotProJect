@@ -66,9 +66,19 @@
               <th class="th-actions">액션</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- JS에서 렌더링 -->
-          </tbody>
+		  <tbody>
+		    <tr th:each="o : ${orderList}"
+		        th:onclick="|location.href='/admin/orders/${o.orderId}'|"
+		        style="cursor:pointer;">
+		      <td th:text="${o.orderId}"></td>
+		      <td th:text="${o.userId}"></td>
+		      <td th:text="${o.orderedAt}"></td>
+		      <td></td>
+		      <td th:text="${o.totalPrice}"></td>
+		      <td>→</td>
+		    </tr>
+		    <!-- JS에서 렌더링 -->
+		  </tbody>
         </table>
       </div>
     </section>
