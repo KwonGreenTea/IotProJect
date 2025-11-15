@@ -16,13 +16,12 @@ import lombok.extern.log4j.Log4j2;
 
 @Controller
 @Log4j2
-@RequestMapping(value  =  "/catalog")
 public class UserBoardController {
 	
 	@Autowired
 	private userBoardService userBoardService;
 	
-	@GetMapping("")
+	@GetMapping("/catalog")
 	public void productList(Model model) {
 		log.info("productList");
 		
@@ -31,9 +30,11 @@ public class UserBoardController {
 		log.info("상품 리스트 : " + productList.get(0)); 
 		
 		model.addAttribute("productList",productList);
+		
+		
 	}
 	
-	@GetMapping("")
+	@GetMapping("/catalog/{productId}")
 	public void selectProductById(Model model, int productId) {
 		log.info("productList");
 		
