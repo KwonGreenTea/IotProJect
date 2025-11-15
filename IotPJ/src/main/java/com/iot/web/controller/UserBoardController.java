@@ -21,17 +21,17 @@ public class UserBoardController {
 	@Autowired
 	private userBoardService userBoardService;
 	
-	@GetMapping("/catalog")
-	public void productList(Model model) {
+	@GetMapping("/")
+	public String productList(Model model) {
 		log.info("productList");
 		
 		List<ProductInfoDTO> productList = userBoardService.selectProductList();
 		
 		log.info("상품 리스트 : " + productList.get(0)); 
 		
-		model.addAttribute("productList",productList);
+		//model.addAttribute("productList",productList);
 		
-		
+		return "shop/index";
 	}
 	
 	@GetMapping("/catalog/{productId}")
