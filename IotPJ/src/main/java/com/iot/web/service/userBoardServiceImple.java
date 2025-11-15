@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.iot.web.domain.ProductInfoDTO;
 import com.iot.web.domain.TestDTO;
@@ -21,14 +22,14 @@ public class userBoardServiceImple implements userBoardService {
 
 	@Override
 	public List<ProductInfoDTO> selectProductList() {
-		log.info("getAllProduct");
+		log.info("selectProductList");
 		
 		return userBoardMapper.selectProductList() ;
 	}
 
 	@Override
-	public ProductInfoDTO selectProductById(int productId) {
-		log.info("getProductById");
+	public ProductInfoDTO selectProductById(@PathVariable Integer productId) {
+		log.info("selectProductById");
 		
 		return userBoardMapper.selectProductById(productId);
 	}

@@ -10,10 +10,10 @@ import lombok.ToString;
 @Setter
 @ToString 
 public class ProductInfoDTO {
-    private Long productId;
+    private Integer productId;
     private String sellerId;
     private String productName;
-    private Long price;
+    private Integer price;
     private Double minTemperature;
     private Double maxTemperature;
     private Integer minHumidity;

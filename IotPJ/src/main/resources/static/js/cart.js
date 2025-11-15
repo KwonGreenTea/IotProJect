@@ -53,7 +53,7 @@ export function renderCart(root) {
       </table>
       <div class="total">총 합계: ${fmt(total)}원</div>
       <div class="toolbar" style="justify-content:flex-end;margin-top:12px;">
-        <a class="btn secondary" href="/shop/products">계속 쇼핑</a>
+        <a class="btn secondary" href="/catalog">계속 쇼핑</a>
         <button class="btn" id="checkout">주문하기</button>
       </div>
     `;

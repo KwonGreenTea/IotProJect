@@ -1,25 +1,35 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>상품 상세</title>
   <link rel="stylesheet" href="/css/shop.css" />
   <script type="module">
-    import { fetchProducts, renderDetail } from "/js/shop.js";
+    import { renderDetail } from "/js/shop.js";
 
     window.addEventListener('DOMContentLoaded', async () => {
-      // URL에서 /shop/{id} 의 {id} 추출
-      const id = location.pathname.split('/').pop();
-      const products = await fetchProducts();
-      const product = products.find(p => String(p.id) === id);
+      // URL에서 /catalog/{productId}의 {productId} 추출
+      const productId = location.pathname.split('/').pop();
       const root = document.querySelector('#detail');
 
-      if (!product) {
-        root.innerHTML = "<p>상품을 찾을 수 없습니다.</p>";
-        return;
+      try {
+        // 단일 상품 조회 API 호출
+        const res = await fetch(`/productList/${productId}`);
+        if (!res.ok) throw new Error("상품 조회 실패: " + res.status);
+        const product = await res.json();
+
+        if (!product) {
+          root.innerHTML = "<p>상품을 찾을 수 없습니다.</p>";
+          return;
+        }
+
+        // 상세 페이지 렌더
+        renderDetail(product, root);
+      } catch (err) {
+        console.error(err);
+        root.innerHTML = "<p>상품 조회 중 오류가 발생했습니다.</p>";
       }
-      renderDetail(product, root);
     });
   </script>
 </head>
@@ -35,7 +45,7 @@
         </p>
       </div>
       <div class="shop-toolbar">
-        <a class="btn secondary" href="/shop">목록</a>
+        <a class="btn secondary" href="/catalog">목록</a>
         <a class="btn secondary" href="/cart">장바구니</a>
       </div>
     </header>
