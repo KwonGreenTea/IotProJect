@@ -6,13 +6,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class ShopPortalController {
-
-    /** 사용자 홈/카탈로그 */
-    @GetMapping({"/", "/catalog"})
-    public String catalog() {
-        // templates/user/catalog.html
-        return "shop/index";
-    }
+//
+//    /** 사용자 홈/카탈로그 */
+//    @GetMapping({"/", "/catalog"})
+//    public String catalog() {
+//        // templates/user/catalog.html
+//        return "shop/index";
+//    }
 
     /** 사용자 주문 목록 */
     @GetMapping("/orders")
