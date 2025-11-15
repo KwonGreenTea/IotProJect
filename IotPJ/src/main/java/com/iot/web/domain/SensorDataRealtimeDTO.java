@@ -1,7 +1,5 @@
 package com.iot.web.domain;
 
-import java.time.LocalDateTime;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,9 +10,9 @@ import lombok.ToString;
 @Setter
 @ToString 
 public class SensorDataRealtimeDTO {
-    private Long recordId;
+    private int recordId;
     private String deviceId;
-    private LocalDateTime measuredAt;
+    private String measuredAt;
     private Double temperature;
-    private Integer humidity;
+    private int humidity;
 }

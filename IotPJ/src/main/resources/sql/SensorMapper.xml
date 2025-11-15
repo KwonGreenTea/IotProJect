@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.iot.web.mapper.SensorMapper">
+
+	<resultMap type="com.iot.web.domain.SensorDataRealtimeDTO" id="SensorResultMap">
+		<id property="recordId" column="RECORD_ID" />
+	    <result property="deviceId" column="DEVICE_ID" />
+	    <result property="measuredAt" column="MEASURED_AT" />
+	    <result property="temperature" column="TEMPERATURE" />
+	    <result property="humidity" column="HUMIDITY" />
+	</resultMap>
+
+	<insert id="insertData">
+		INSERT INTO SENSOR_DATA_REALTIME (
+			RECORD_ID
+		  , DEVICE_ID
+		  , MEASURED_AT
+		  , TEMPERATURE
+		  , HUMIDITY
+	    )
+		VALUES (
+			SENSOR_DATA_SEQ.NEXTVAL
+		  , #{deviceId}
+		  , #{measuredAt}
+		  , #{temperature}
+		  , #{humidity}
+	    )
+	</insert>
+
+	
+	<select id="retrieveDataList" resultMap="SensorResultMap">
+		SELECT *
+          FROM (
+			SELECT *
+		      FROM SENSOR_DATA_REALTIME A
+		     WHERE DEVICE_ID = #{deviceId}
+		  ORDER BY RECORD_ID DESC
+		  )
+	  <![CDATA[
+		 WHERE ROWNUM <= 10
+	  ]]>
+	</select>
+	
+
+</mapper>
+
+
+
