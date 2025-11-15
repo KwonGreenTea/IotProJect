@@ -12,5 +12,7 @@ public interface SensorMapper {
 	void insertData(SensorDataRealtimeDTO dataDTO);
 
 	List<SensorDataRealtimeDTO> retrieveDataList(String deviceId);
+
+	String retrieveDeviceIdByOrderId(String orderId);
 	
 }

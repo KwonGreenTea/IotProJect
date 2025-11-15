@@ -8,4 +8,6 @@ public interface SensorService {
 	void insertData(SensorDataRealtimeDTO dataDTO);
 
 	List<SensorDataRealtimeDTO> retrieveDataList(String deviceId);
+
+	String retrieveDeviceIdByOrderId(String orderId);
 }

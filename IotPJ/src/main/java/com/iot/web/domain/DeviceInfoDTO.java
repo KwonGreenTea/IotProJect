@@ -1,7 +1,5 @@
 package com.iot.web.domain;
 
-import java.time.LocalDate;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +12,8 @@ import lombok.ToString;
 public class DeviceInfoDTO {
     private String deviceId;
     private String deviceName;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String startDate;
+    private String endDate;
     private String isActive;
+    private int orderId;
 }

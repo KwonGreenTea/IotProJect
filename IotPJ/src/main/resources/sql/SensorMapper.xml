@@ -44,6 +44,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	  ]]>
 	</select>
 	
+	<select id="retrieveDeviceIdByOrderId" resultType="java.lang.String">
+		SELECT A.DEVICE_ID
+          FROM DEVICE_INFO A, SENSOR_DATA_REALTIME B 
+		 WHERE A.DEVICE_ID = B.DEVICE_ID
+		   AND A.ORDER_ID = ${orderId}
+	</select>
 
 </mapper>
 

@@ -1,7 +1,5 @@
 package com.iot.web.domain;
 
-import java.time.LocalDateTime;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,11 +10,12 @@ import lombok.ToString;
 @Setter
 @ToString 
 public class OrderInfoDTO {
-    private Long orderId;
-    private Long productId;
+    private int orderId;
+    private int productId;
     private String sellerId;
     private String userId;
     private String deliveryId;
-    private LocalDateTime orderedAt;
-    private Long totalPrice;
+    private String orderedAt;
+    private int totalPrice;
+    private String isActive;
 }

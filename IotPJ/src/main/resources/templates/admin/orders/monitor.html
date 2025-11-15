@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -11,13 +11,14 @@
 
     <!-- 상단 헤더 + 뒤로가기 -->
     <header class="page-header page-header--with-back">
+	  <div>
+		<h1 class="page-title">주문 모니터링</h1>
+		<p class="page-subtitle">
+		  선택한 주문의 배송 상태와 온·습도를 한 화면에서 확인하세요.
+		</p>
+	  </div>
       <a class="btn btn-ghost btn-back" href="/admin/orders">← 구매자 리스트</a>
-      <div>
-        <h1 class="page-title">주문 모니터링</h1>
-        <p class="page-subtitle">
-          선택한 주문의 배송 상태와 온·습도를 한 화면에서 확인하세요.
-        </p>
-      </div>
+     
     </header>
 
     <!-- 주문 요약 (JS에서 innerHTML 채우기) -->
@@ -96,5 +97,24 @@
   </div>
 
   <script type="module" src="/js/pages/adminMonitor.js"></script>
+  
+  <script th:inline="javascript">
+  /*<![CDATA[*/
+      const deviceId = /*[[${deviceId}]]*/ 'UNKNOWN';
+      console.log("Connecting SSE for deviceId =", deviceId);
+
+      const eventSource = new EventSource(`/data/stream/${deviceId}`);
+      eventSource.addEventListener("newData", function(event) {
+         const d = JSON.parse(event.data);
+         console.log("Received SSE data =", d);
+
+         document.getElementById("temp").innerText = d.temperature.toFixed(1);;
+         document.getElementById("humid").innerText = d.humidity;
+         document.getElementById("ts").innerText = d.measuredAt;
+      });
+     
+  /*]]>*/
+  </script>
+		
 </body>
 </html>

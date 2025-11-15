@@ -1,5 +1,7 @@
 package com.iot.web.controller;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
 import com.iot.web.service.AdminService;
 
@@ -21,7 +24,7 @@ public class AdminPortalController {
 	private AdminService adminService;
 	
     /** 운영자 홈 */
-    @GetMapping({"/admin", "/admin/home"})
+    @GetMapping("/admin")
     public String adminHome() {
         // templates/admin/home.html
         return "admin/home";
@@ -43,9 +46,25 @@ public class AdminPortalController {
     }
 
     /** 운영자 주문 상세/모니터 */
-    @GetMapping("/admin/orders/{id}")
-    public String adminOrderMonitor(@PathVariable String id) {
-        // templates/admin/orders/monitor.html
+    @GetMapping("/admin/orders/{orderId}")
+    public String adminOrderMonitor(Model model, @PathVariable String orderId) {
+    	// 현재 활성화 되지 않은 센서(장비)에 orderId를 맵핑
+    	String startDate = getSysDt();
+    	adminService.updateDeviceId(orderId, startDate);
+    	
+    	// orderId에 대한 센서(장비) 데이터 정보 가져옴
+    	DeviceInfoDTO deviceInfoDTO = adminService.retrieveDeviceData(orderId);
+    	
+    	// orderId에 대한 주문 데이터 정보 가져옴
+    	OrderInfoDTO orderInfoDTO = adminService.retrieveOrderDataForOrderId(orderId);
+
+    	log.info("deviceInfoDTO : " + deviceInfoDTO);
+    	log.info("orderInfoDTO : " + orderInfoDTO);
+    	
+    	model.addAttribute("deviceInfoDTO", deviceInfoDTO);
+    	model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
+    	model.addAttribute("orderInfoDTO", orderInfoDTO);
+    	
         return "admin/orders/monitor";
     }
 
@@ -62,4 +81,8 @@ public class AdminPortalController {
         // templates/admin/products/new.html
         return "admin/products/new";
     }
+    
+    private String getSysDt() {
+		return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+	}
 }

@@ -26,5 +26,10 @@ public class SensorServiceImple implements SensorService {
 	public List<SensorDataRealtimeDTO> retrieveDataList(String deviceId) {
 		return sensorMapper.retrieveDataList(deviceId);
 	}
+
+	@Override
+	public String retrieveDeviceIdByOrderId(String orderId) {
+		return sensorMapper.retrieveDeviceIdByOrderId(orderId);
+	}
 	
 }
