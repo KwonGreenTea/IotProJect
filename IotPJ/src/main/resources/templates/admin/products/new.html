@@ -24,12 +24,26 @@
   <!-- 등록 폼 카드 -->
   <section class="card">
     <form id="productForm" class="form-grid">
+      <!-- 셀러 ID -->
+      <div class="form-field">
+        <label class="form-label">셀러 ID <span class="required">*</span></label>
+        <input
+          type="text"
+          id="sellerId"
+          name="sellerId"
+          class="input"
+          placeholder="예) SELLER01"
+          required
+        />
+      </div>
+
       <!-- 상품명 -->
       <div class="form-field">
         <label class="form-label">상품명 <span class="required">*</span></label>
         <input
           type="text"
-          name="name"
+          id="productName"
+          name="productName"
           class="input"
           placeholder="예) 아이스크림"
           required
@@ -41,6 +55,7 @@
         <label class="form-label">가격(원) <span class="required">*</span></label>
         <input
           type="number"
+          id="price"
           name="price"
           class="input"
           min="0"
@@ -56,14 +71,16 @@
         <div class="field-inline">
           <input
             type="number"
-            name="tempMin"
+            id="minTemperature"
+            name="minTemperature"
             class="input"
             placeholder="최소"
           />
           <span class="field-separator">~</span>
           <input
             type="number"
-            name="tempMax"
+            id="maxTemperature"
+            name="maxTemperature"
             class="input"
             placeholder="최대"
           />
@@ -76,14 +93,16 @@
         <div class="field-inline">
           <input
             type="number"
-            name="humidMin"
+            id="minHumidity"
+            name="minHumidity"
             class="input"
             placeholder="최소"
           />
           <span class="field-separator">~</span>
           <input
             type="number"
-            name="humidMax"
+            id="maxHumidity"
+            name="maxHumidity"
             class="input"
             placeholder="최대"
           />
