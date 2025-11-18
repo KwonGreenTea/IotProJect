@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
+import com.iot.web.domain.ProductInfoDTO;
 
 @Mapper
 public interface AdminMapper {
@@ -19,4 +20,5 @@ public interface AdminMapper {
 
 	OrderInfoDTO retrieveOrderDataForOrderId(String orderId);
 
+	void insertProduct(ProductInfoDTO product);
 }
