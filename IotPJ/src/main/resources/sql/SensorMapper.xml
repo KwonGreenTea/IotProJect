@@ -6,11 +6,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.iot.web.mapper.SensorMapper">
 
 	<resultMap type="com.iot.web.domain.SensorDataRealtimeDTO" id="SensorResultMap">
-		<id property="recordId" column="RECORD_ID" />
-	    <result property="deviceId" column="DEVICE_ID" />
-	    <result property="measuredAt" column="MEASURED_AT" />
-	    <result property="temperature" column="TEMPERATURE" />
-	    <result property="humidity" column="HUMIDITY" />
+   	 	<id property="recordId" column="RECORD_ID" />
+    	<result property="deviceId" column="DEVICE_ID" />
+    	<result property="measuredAt" column="MEASURED_AT" />
+    	<result property="temperature" column="TEMPERATURE" />
+    	<result property="humidity" column="HUMIDITY" />
+    
+    	<result property="maxTemperature" column="MAX_TEMP" />
+    	<result property="maxHumidity" column="MAX_HUMID" />
 	</resultMap>
 
 	<insert id="insertData">
@@ -32,17 +35,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	
 	<select id="retrieveDataList" resultMap="SensorResultMap">
-		SELECT *
-          FROM (
-			SELECT *
-		      FROM SENSOR_DATA_REALTIME A
-		     WHERE DEVICE_ID = #{deviceId}
-		  ORDER BY RECORD_ID DESC
-		  )
-	  <![CDATA[
-		 WHERE ROWNUM <= 10
-	  ]]>
+	    SELECT
+	        RECORD_ID,
+	        DEVICE_ID,
+	        MEASURED_AT,
+	        TEMPERATURE,
+	        HUMIDITY,
+	        MAX(TEMPERATURE) OVER() AS MAX_TEMP,  
+	        MAX(HUMIDITY) OVER() AS MAX_HUMID
+	    FROM
+	        SENSOR_DATA_REALTIME
+	    WHERE
+	        DEVICE_ID = #{deviceId}  ORDER BY
+	        RECORD_ID DESC
+	    FETCH FIRST 10 ROWS ONLY
 	</select>
+	<!-- FETCH FIRST 10 ROWS ONLY: 이 구문은 ORDER BY가 적용된 최종 결과셋에서 가장 상위 10개의 행만 반환하도록 합니다. -->
+	
 	
 	<select id="retrieveDeviceIdByOrderId" resultType="java.lang.String">
 		SELECT A.DEVICE_ID

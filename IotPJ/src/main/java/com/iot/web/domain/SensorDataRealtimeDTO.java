@@ -15,4 +15,6 @@ public class SensorDataRealtimeDTO {
     private String measuredAt;
     private Double temperature;
     private int humidity;
+    private Double maxTemperature;
+    private int maxHumidity;
 }

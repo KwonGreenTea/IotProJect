@@ -93,22 +93,24 @@ public class SensorController {
     			
     	// 온도/습도 데이터를 가져와 평균 수치 계산 (최대 10개)
     	List<SensorDataRealtimeDTO> dataList = sensorService.retrieveDataList(deviceId);
-    	int dataCnt = dataList.size();
-    			
-    	Double totalTemperature = 0.0;
-    	Integer totalHumidity = 0;
-    	for(SensorDataRealtimeDTO tempDTO : dataList) {
-    		totalTemperature += tempDTO.getTemperature();
-    		totalHumidity += tempDTO.getHumidity();
+   
+    	log.info(dataList);
+    	
+    	Double maxTemperature = null;
+    	int maxHumidity = 0;
+    	
+    	if (dataList != null && !dataList.isEmpty()) {
+    	    SensorDataRealtimeDTO firstData = dataList.get(0);
+    	    
+    	    // 첫 번째 DTO에서 최대 온도/습도 값만 추출
+    	    maxTemperature = firstData.getMaxTemperature(); 
+    	    maxHumidity = firstData.getMaxHumidity();
+    	    
+    	    // 필요하다면, 추출한 최대값을 현재 삽입된 dataDTO에 다시 넣어줄 수도 있습니다.
+    	    dataDTO.setMaxTemperature(maxTemperature);
+    	    dataDTO.setMaxHumidity(maxHumidity);
     	}
-    			
-    	log.info("totalTemperature : " + totalTemperature);
-    	log.info("totalHumidity : " + totalHumidity);
-    	log.info("dataCnt : " + dataCnt);
-
-    	dataDTO.setTemperature(totalTemperature / dataCnt);
-    	dataDTO.setHumidity(totalHumidity / dataCnt);
-    			
+   
     	log.info(dataDTO);
 
         ObjectMapper mapper = new ObjectMapper();

@@ -51,13 +51,17 @@ public class AdminPortalController {
     	// 현재 활성화 되지 않은 센서(장비)에 orderId를 맵핑
     	String startDate = getSysDt();
     	adminService.updateDeviceId(orderId, startDate);
+    	log.info("updateDeviceId 완료");
     	
     	// orderId에 대한 센서(장비) 데이터 정보 가져옴
     	DeviceInfoDTO deviceInfoDTO = adminService.retrieveDeviceData(orderId);
+    	log.info("retrieveDeviceData");
     	
     	// orderId에 대한 주문 데이터 정보 가져옴
     	OrderInfoDTO orderInfoDTO = adminService.retrieveOrderDataForOrderId(orderId);
 
+    	log.info("retrieveOrderDataForOrderId");
+    	
     	log.info("deviceInfoDTO : " + deviceInfoDTO);
     	log.info("orderInfoDTO : " + orderInfoDTO);
     	
@@ -65,6 +69,7 @@ public class AdminPortalController {
     	model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
     	model.addAttribute("orderInfoDTO", orderInfoDTO);
     	
+    	// 
         return "admin/orders/monitor";
     }
 

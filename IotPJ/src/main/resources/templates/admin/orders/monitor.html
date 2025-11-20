@@ -108,8 +108,8 @@
          const d = JSON.parse(event.data);
          console.log("Received SSE data =", d);
 
-         document.getElementById("temp").innerText = d.temperature.toFixed(1);;
-         document.getElementById("humid").innerText = d.humidity;
+         document.getElementById("temp").innerText = d.maxTemperature.toFixed(1);;
+         document.getElementById("humid").innerText = d.maxHumidity;
          document.getElementById("ts").innerText = d.measuredAt;
       });
      
