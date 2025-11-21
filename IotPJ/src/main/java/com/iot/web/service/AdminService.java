@@ -4,15 +4,19 @@ import java.util.List;
 
 import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
+import com.iot.web.domain.ProductInfoDTO;
 
 public interface AdminService {
-	List<OrderInfoDTO> retrieveOrderData();
-	
-	void updateDeviceId(String orderId, String startDate);
 
-	DeviceInfoDTO retrieveDeviceData(String orderId);
+    // 주문/디바이스 관련
+    List<OrderInfoDTO> retrieveOrderData();
 
-	OrderInfoDTO retrieveOrderDataForOrderId(String orderId);
+    void updateDeviceId(String orderId, String startDate);
 
-	
+    DeviceInfoDTO retrieveDeviceData(String orderId);
+
+    OrderInfoDTO retrieveOrderDataForOrderId(String orderId);
+
+    // 상품 등록 관련
+    void createProduct(ProductInfoDTO dto);
 }

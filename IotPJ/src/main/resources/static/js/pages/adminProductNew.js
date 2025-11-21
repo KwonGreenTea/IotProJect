@@ -1,39 +1,74 @@
-const form = document.querySelector('#productForm');
-const msg  = document.querySelector('#msg');
+// /src/main/resources/static/js/pages/adminProductNew.js
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
+window.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("#productForm");
+  const msg = document.querySelector("#msg");
 
-  const formData = new FormData(form);
+  if (!form) return;
 
-  const payload = {
-    sellerId:       formData.get('sellerId'),      
-    productName:    formData.get('productName'),
-    price:          Number(formData.get('price')),
-    minTemperature: formData.get('minTemperature') ? Number(formData.get('minTemperature')) : null,
-    maxTemperature: formData.get('maxTemperature') ? Number(formData.get('maxTemperature')) : null,
-    minHumidity:    formData.get('minHumidity') ? Number(formData.get('minHumidity')) : null,
-    maxHumidity:    formData.get('maxHumidity') ? Number(formData.get('maxHumidity')) : null,
-  };
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  try {
-    const res = await fetch('/admin/products', {   // ★ 절대 경로
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    msg.textContent = "";
+    msg.className = "form-message";
 
-    if (!res.ok) {
-      msg.textContent = '상품 등록 중 오류가 발생했습니다. 서버 응답이 정상이 아닙니다.';
+    const formData = new FormData(form);
+
+    const dto = {
+      sellerId: formData.get("sellerId") || "SELLER01", // 셀러ID input 있으면 그대로, 없으면 기본값
+      productName: formData.get("productName"),
+      price: formData.get("price") ? Number(formData.get("price")) : null,
+      minTemperature: formData.get("minTemperature")
+        ? Number(formData.get("minTemperature"))
+        : null,
+      maxTemperature: formData.get("maxTemperature")
+        ? Number(formData.get("maxTemperature"))
+        : null,
+      minHumidity: formData.get("minHumidity")
+        ? Number(formData.get("minHumidity"))
+        : null,
+      maxHumidity: formData.get("maxHumidity")
+        ? Number(formData.get("maxHumidity"))
+        : null,
+    };
+
+    // 필수값 체크 (상품명/가격)
+    if (!dto.productName || dto.productName.trim().length === 0) {
+      msg.textContent = "상품명을 입력해주세요.";
+      msg.classList.add("error");
+      return;
+    }
+    if (dto.price == null || isNaN(dto.price)) {
+      msg.textContent = "가격을 올바르게 입력해주세요.";
+      msg.classList.add("error");
       return;
     }
 
-    msg.textContent = '상품이 성공적으로 등록되었습니다.';
-    // location.href = '/admin/products';  // 필요하면 자동 이동
-  } catch (err) {
-    console.error(err);
-    msg.textContent = '상품 등록 중 네트워크 오류가 발생했습니다.';
-  }
+    try {
+      const res = await fetch("/admin/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8",
+        },
+        body: JSON.stringify(dto),
+      });
+
+      const text = await res.text();
+
+      if (!res.ok || text !== "OK") {
+        throw new Error(text || "서버 응답 오류");
+      }
+
+      msg.textContent = "상품이 성공적으로 등록되었습니다.";
+      msg.classList.add("success");
+
+      // 폼 초기화
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      msg.textContent =
+        "상품 등록 중 오류가 발생했습니다. 서버 응답이 정상이 아닙니다.";
+      msg.classList.add("error");
+    }
+  });
 });

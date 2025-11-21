@@ -9,9 +9,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
+import com.iot.web.domain.ProductInfoDTO;
 import com.iot.web.service.AdminService;
 
 import lombok.extern.log4j.Log4j2;
@@ -20,9 +24,9 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AdminPortalController {
 
-	@Autowired
-	private AdminService adminService;
-	
+    @Autowired
+    private AdminService adminService;
+
     /** 운영자 홈 */
     @GetMapping("/admin")
     public String adminHome() {
@@ -33,14 +37,14 @@ public class AdminPortalController {
     /** 운영자 주문 목록 */
     @GetMapping("/admin/orders")
     public String adminOrders(Model model) {
-    	List<OrderInfoDTO> orderList = adminService.retrieveOrderData();
-    	
-    	for(OrderInfoDTO tempDTO : orderList) {
-    		log.info(tempDTO);
-    	}
-    	
-    	model.addAttribute("orderList", orderList);
-    	
+        List<OrderInfoDTO> orderList = adminService.retrieveOrderData();
+
+        for (OrderInfoDTO tempDTO : orderList) {
+            log.info(tempDTO);
+        }
+
+        model.addAttribute("orderList", orderList);
+
         // templates/admin/orders/list.html
         return "admin/orders/list";
     }
@@ -48,28 +52,26 @@ public class AdminPortalController {
     /** 운영자 주문 상세/모니터 */
     @GetMapping("/admin/orders/{orderId}")
     public String adminOrderMonitor(Model model, @PathVariable String orderId) {
-    	// 현재 활성화 되지 않은 센서(장비)에 orderId를 맵핑
-    	String startDate = getSysDt();
-    	adminService.updateDeviceId(orderId, startDate);
-    	log.info("updateDeviceId 완료");
-    	
-    	// orderId에 대한 센서(장비) 데이터 정보 가져옴
-    	DeviceInfoDTO deviceInfoDTO = adminService.retrieveDeviceData(orderId);
-    	log.info("retrieveDeviceData");
-    	
-    	// orderId에 대한 주문 데이터 정보 가져옴
-    	OrderInfoDTO orderInfoDTO = adminService.retrieveOrderDataForOrderId(orderId);
+        // 현재 활성화 되지 않은 센서(장비)에 orderId를 맵핑
+        String startDate = getSysDt();
+        adminService.updateDeviceId(orderId, startDate);
+        log.info("updateDeviceId 완료");
 
-    	log.info("retrieveOrderDataForOrderId");
-    	
-    	log.info("deviceInfoDTO : " + deviceInfoDTO);
-    	log.info("orderInfoDTO : " + orderInfoDTO);
-    	
-    	model.addAttribute("deviceInfoDTO", deviceInfoDTO);
-    	model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
-    	model.addAttribute("orderInfoDTO", orderInfoDTO);
-    	
-    	// 
+        // orderId에 대한 센서(장비) 데이터 정보
+        DeviceInfoDTO deviceInfoDTO = adminService.retrieveDeviceData(orderId);
+        log.info("retrieveDeviceData");
+
+        // orderId에 대한 주문 데이터 정보
+        OrderInfoDTO orderInfoDTO = adminService.retrieveOrderDataForOrderId(orderId);
+        log.info("retrieveOrderDataForOrderId");
+
+        log.info("deviceInfoDTO : {}", deviceInfoDTO);
+        log.info("orderInfoDTO : {}", orderInfoDTO);
+
+        model.addAttribute("deviceInfoDTO", deviceInfoDTO);
+        model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
+        model.addAttribute("orderInfoDTO", orderInfoDTO);
+
         return "admin/orders/monitor";
     }
 
@@ -80,14 +82,29 @@ public class AdminPortalController {
         return "admin/products/list";
     }
 
-    /** 운영자 상품 신규 등록 */
+    /** 운영자 상품 신규 등록 화면 */
     @GetMapping("/admin/products/new")
     public String adminProductNew() {
         // templates/admin/products/new.html
         return "admin/products/new";
     }
-    
+
+    /** 운영자 상품 신규 등록 처리 (AJAX) */
+    @PostMapping("/admin/products")
+    @ResponseBody
+    public String createProduct(@RequestBody ProductInfoDTO dto) {
+        try {
+            log.info("상품 등록 요청: {}", dto);
+            adminService.createProduct(dto);
+            return "OK";
+        } catch (Exception e) {
+            log.error("상품 등록 중 오류", e);
+            return "ERROR";
+        }
+    }
+
     private String getSysDt() {
-		return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-	}
+        return LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
 }
