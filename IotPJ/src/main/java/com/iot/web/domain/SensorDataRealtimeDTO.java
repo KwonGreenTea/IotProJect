@@ -17,4 +17,6 @@ public class SensorDataRealtimeDTO {
     private int humidity;
     private Double maxTemperature;
     private int maxHumidity;
+    private Double minTemperature;
+    private int minHumidity;
 }

@@ -98,17 +98,26 @@ public class SensorController {
     	
     	Double maxTemperature = null;
     	int maxHumidity = 0;
+    	// 최소값 변수 추가
+    	Double minTemperature = null;
+    	int minHumidity = 0;
     	
     	if (dataList != null && !dataList.isEmpty()) {
     	    SensorDataRealtimeDTO firstData = dataList.get(0);
     	    
-    	    // 첫 번째 DTO에서 최대 온도/습도 값만 추출
+    	 // 최대값 추출
     	    maxTemperature = firstData.getMaxTemperature(); 
     	    maxHumidity = firstData.getMaxHumidity();
     	    
-    	    // 필요하다면, 추출한 최대값을 현재 삽입된 dataDTO에 다시 넣어줄 수도 있습니다.
+    	    // 최소값 추출 (새로 추가)
+    	    minTemperature = firstData.getMinTemperature();
+    	    minHumidity = firstData.getMinHumidity();
+    	    
+    	    // 현재 삽입된 dataDTO에 최대/최소값을 넣어줍니다.
     	    dataDTO.setMaxTemperature(maxTemperature);
     	    dataDTO.setMaxHumidity(maxHumidity);
+    	    dataDTO.setMinTemperature(minTemperature); // 최소 온도 설정
+    	    dataDTO.setMinHumidity(minHumidity);       // 최소 습도 설정
     	}
    
     	log.info(dataDTO);

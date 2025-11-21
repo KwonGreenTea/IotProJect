@@ -39,30 +39,47 @@
         </div>
       </div>
 
-      <div id="sensor" class="sensor-panel">
-        <div class="sensor-main">
-          <div class="chip chip--temp">
-            <span class="chip-label">온도</span>
-            <span class="chip-value">
-              🌡️ <b id="temp">--</b><span class="chip-unit">°C</span>
-            </span>
-          </div>
+	  <div id="sensor" class="sensor-panel">
+	    
+	    <div class="sensor-main">
+	      <h3 class="sensor-group-title">현재/최대 값 (Max)</h3>
+	      <div class="chip chip--temp">
+	        <span class="chip-label">온도 (Max)</span>
+	        <span class="chip-value">
+	          🌡️ <b id="tempMax">--</b><span class="chip-unit">°C</span> 
+	        </span>
+	      </div>
 
-          <div class="chip chip--humid">
-            <span class="chip-label">습도</span>
-            <span class="chip-value">
-              💧 <b id="humid">--</b><span class="chip-unit">%</span>
-            </span>
-          </div>
-        </div>
+	      <div class="chip chip--humid">
+	        <span class="chip-label">습도 (Max)</span>
+	        <span class="chip-value">
+	          💧 <b id="humidMax">--</b><span class="chip-unit">%</span>
+	        </span>
+	      </div>
+	    </div>
+	    
+	    <div class="sensor-meta-group">
+	      <h3 class="sensor-group-title">최소 값 (Min)</h3>
+	      <div class="chip chip--temp-min">
+	        <span class="chip-label">온도 (Min)</span>
+	        <span class="chip-value">
+	          ⬇️ <b id="tempMin">--</b><span class="chip-unit">°C</span> 
+	        </span>
+	      </div>
+	      
+	      <div class="chip chip--humid-min">
+	        <span class="chip-label">습도 (Min)</span>
+	        <span class="chip-value">
+	          💦 <b id="humidMin">--</b><span class="chip-unit">%</span>
+	        </span>
+	      </div>
+	    </div>
 
-        <div class="sensor-meta">
-          <div class="sensor-timestamp">
-            <span class="sensor-label">마지막 업데이트</span>
-            <span class="sensor-value" id="ts">--</span>
-          </div>
-        </div>
-      </div>
+	    <div class="sensor-meta sensor-timestamp-panel">
+	      <span class="sensor-label">마지막 업데이트 시각</span>
+	      <span class="sensor-value" id="ts">--</span>
+	    </div>
+	  </div>
 
       <div class="sensor-tip" id="tip"></div>
     </section>
@@ -99,22 +116,30 @@
   <script type="module" src="/js/pages/adminMonitor.js"></script>
   
   <script th:inline="javascript">
-  /*<![CDATA[*/
-      const deviceId = /*[[${deviceId}]]*/ 'UNKNOWN';
-      console.log("Connecting SSE for deviceId =", deviceId);
+    /*<![CDATA[*/
+        const deviceId = /*[[${deviceId}]]*/ 'UNKNOWN';
+        console.log("Connecting SSE for deviceId =", deviceId);
 
-      const eventSource = new EventSource(`/data/stream/${deviceId}`);
-      eventSource.addEventListener("newData", function(event) {
-         const d = JSON.parse(event.data);
-         console.log("Received SSE data =", d);
+        const eventSource = new EventSource(`/data/stream/${deviceId}`);
+        
+        eventSource.addEventListener("newData", function(event) {
+           const d = JSON.parse(event.data);
+           console.log("Received SSE data =", d);
 
-         document.getElementById("temp").innerText = d.maxTemperature.toFixed(1);;
-         document.getElementById("humid").innerText = d.maxHumidity;
-         document.getElementById("ts").innerText = d.measuredAt;
-      });
-     
-  /*]]>*/
-  </script>
+           // --- 최대 온도/습도 업데이트 (기존 로직 확장) ---
+           document.getElementById("tempMax").innerText = d.maxTemperature.toFixed(1);
+           document.getElementById("humidMax").innerText = d.maxHumidity;
+
+           // --- 최소 온도/습도 업데이트 (새로 추가) ---
+           document.getElementById("tempMin").innerText = d.minTemperature.toFixed(1);
+           document.getElementById("humidMin").innerText = d.minHumidity;
+
+           // 마지막 업데이트 시각
+           document.getElementById("ts").innerText = d.measuredAt;
+        });
+       
+    /*]]>*/
+    </script>
 		
 </body>
 </html>
