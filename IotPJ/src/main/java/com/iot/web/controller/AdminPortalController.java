@@ -79,12 +79,14 @@ public class AdminPortalController {
     public String adminOrderMonitor(Model model, @PathVariable String orderId) {
         // 현재 활성화 되지 않은 센서(장비)에 orderId를 맵핑
         String startDate = getSysDt();
+        log.info("orderId : " + orderId); 
         adminService.updateDeviceId(orderId, startDate);
         log.info("updateDeviceId 완료");
 
         // orderId에 대한 센서(장비) 데이터 정보
         DeviceInfoDTO deviceInfoDTO = adminService.retrieveDeviceData(orderId);
-        log.info("retrieveDeviceData");
+        log.info("retrieveDeviceData 완료");
+        log.info("deviceInfoDTO 장비 정보 : " + deviceInfoDTO.toString());
 
         // orderId에 대한 주문 데이터 정보
         OrderInfoDTO orderInfoDTO = adminService.retrieveOrderDataForOrderId(orderId);

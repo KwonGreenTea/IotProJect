@@ -53,19 +53,28 @@ public class SseEmitterManager {
         return emitter;
     }
 
-    // --- 2. 아두이노에서 데이터를 받아와 해당 deviceId 관리자 페이지에 표시
     public void sendData(String deviceId, String json) {
-        CopyOnWriteArrayList<SseEmitter> deviceEmitters = emitters.get(deviceId); 
+        CopyOnWriteArrayList<SseEmitter> deviceEmitters = emitters.get(deviceId);
 
         if (deviceEmitters != null && !deviceEmitters.isEmpty()) {
             for (SseEmitter emitter : deviceEmitters) {
                 try {
                     emitter.send(SseEmitter.event()
                             .id(String.valueOf(System.currentTimeMillis()))
-                            .name("newData") 
-                            .data(json)); 
-                } catch (IOException e) {
-                    emitter.completeWithError(e); 
+                            .name("newData")
+                            .data(json));
+                } catch (IOException | IllegalStateException e) {
+                    // [수정 1] IllegalStateException도 같이 잡아야 합니다.
+                    // 이 에러는 타임아웃/종료된 연결에 보낼 때 발생합니다.
+                    
+                    emitter.completeWithError(e);
+                    
+                    // [수정 2] 에러 난 Emitter는 리스트에서 즉시 제거해주는 것이 좋습니다.
+                    // (물론 onCompletion 콜백에서 제거하도록 되어있다면 생략 가능하지만, 명시적으로 지우는 게 안전합니다)
+                    deviceEmitters.remove(emitter);
+                } catch (Exception e) {
+                    // [선택] 그 외 알 수 없는 에러로 멈추는 것 방지
+                    deviceEmitters.remove(emitter);
                 }
             }
         }

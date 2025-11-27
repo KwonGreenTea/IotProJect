@@ -37,25 +37,34 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	
 	<select id="retrieveDataList" resultMap="SensorResultMap">
-			SELECT
-			        RECORD_ID,
-			        DEVICE_ID,
-			        MEASURED_AT,
-			        TEMPERATURE,
-			        HUMIDITY,
-			        MAX(TEMPERATURE) OVER() AS MAX_TEMP,
-			        MAX(HUMIDITY) OVER() AS MAX_HUMID,
-			        MIN(TEMPERATURE) OVER() AS MIN_TEMP,
-			        MIN(HUMIDITY) OVER() AS MIN_HUMID
-			    FROM
-			        SENSOR_DATA_REALTIME
-			    WHERE
-			        DEVICE_ID = #{deviceId}
-			    ORDER BY
-			        RECORD_ID DESC
-			    FETCH FIRST 10 ROWS ONLY
-	</select>
-	<!-- FETCH FIRST 10 ROWS ONLY: 이 구문은 ORDER BY가 적용된 최종 결과셋에서 가장 상위 10개의 행만 반환하도록 합니다. -->
+	    SELECT
+	        T.RECORD_ID,
+	        T.DEVICE_ID,
+	        T.MEASURED_AT,
+	        T.TEMPERATURE,
+	        T.HUMIDITY,
+	        MAX(T.TEMPERATURE) OVER() AS MAX_TEMP,
+	        MAX(T.HUMIDITY)    OVER() AS MAX_HUMID,
+	        MIN(T.TEMPERATURE) OVER() AS MIN_TEMP,
+	        MIN(T.HUMIDITY)    OVER() AS MIN_HUMID
+	    FROM 
+	        (
+	            -- [1단계] 먼저 최신 10개만 딱 잘라냄
+	            SELECT
+	                RECORD_ID,
+	                DEVICE_ID,
+	                MEASURED_AT,
+	                TEMPERATURE,
+	                HUMIDITY
+	            FROM
+	                SENSOR_DATA_REALTIME
+	            WHERE
+	                DEVICE_ID = #{deviceId}
+	            ORDER BY
+	                RECORD_ID DESC
+	            FETCH FIRST 10 ROWS ONLY
+	        ) T
+</select>
 	
 	
 	<select id="retrieveDeviceIdByOrderId" resultType="java.lang.String">

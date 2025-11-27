@@ -42,59 +42,54 @@ public class SensorController {
             @RequestHeader(value = "x-api-key", required = false) String apiKey,
             @RequestBody Map<String, Object> jsonData) throws JsonProcessingException {
 
-    	// POST 인증 확인
-    	if (!API_KEY.equals(apiKey)) {
-    		return ResponseEntity.status(HttpStatus.FORBIDDEN).body("인증되지 않은 사용자");
-    	}
+        // 1. POST 인증 확인
+        if (!API_KEY.equals(apiKey)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("인증되지 않은 사용자");
+        }
+        
+        log.info("receiveDataPost");
+        
+        // 2. 데이터 파싱 및 DB 저장
+        String deviceId = (String) jsonData.get("sensorCd");
 
-    	// 가져온 데이터 TB에 INSERT
-    	String deviceId = (String) jsonData.get("sensorCd");
+        SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
+        dataDTO.setDeviceId(deviceId);
+        dataDTO.setMeasuredAt(getSysDt());
+        dataDTO.setTemperature(Double.parseDouble((String) jsonData.get("temperature")));
+        dataDTO.setHumidity(Integer.parseInt((String) jsonData.get("humidity")));
 
-    	SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
-    	dataDTO.setDeviceId(deviceId);
-    	dataDTO.setMeasuredAt(getSysDt());
-    	dataDTO.setTemperature(Double.parseDouble((String) jsonData.get("temperature")));
-    	dataDTO.setHumidity(Integer.parseInt((String) jsonData.get("humidity")));
+        sensorService.insertData(dataDTO);
+        log.info("insertData() 완료" );
+        
+        // 3. 통계 데이터 계산 (Max/Min)
+        List<SensorDataRealtimeDTO> dataList = sensorService.retrieveDataList(deviceId);
+        log.info(dataList);
+        
+        if (dataList != null && !dataList.isEmpty()) {
+            SensorDataRealtimeDTO firstData = dataList.get(0);
+            dataDTO.setMaxTemperature(firstData.getMaxTemperature()); 
+            dataDTO.setMaxHumidity(firstData.getMaxHumidity());
+            dataDTO.setMinTemperature(firstData.getMinTemperature());
+            dataDTO.setMinHumidity(firstData.getMinHumidity());       
+        }
 
-    	sensorService.insertData(dataDTO);
+        log.info(dataDTO);
 
-    			
-    	// 온도/습도 데이터를 가져와 평균 수치 계산 (최대 10개)
-    	List<SensorDataRealtimeDTO> dataList = sensorService.retrieveDataList(deviceId);
-   
-    	log.info(dataList);
-    	
-    	Double maxTemperature = null;
-    	int maxHumidity = 0;
-    	// 최소값 변수 추가
-    	Double minTemperature = null;
-    	int minHumidity = 0;
-    	
-    	if (dataList != null && !dataList.isEmpty()) {
-    	    SensorDataRealtimeDTO firstData = dataList.get(0);
-    	    
-    	 // 최대값 추출
-    	    maxTemperature = firstData.getMaxTemperature(); 
-    	    maxHumidity = firstData.getMaxHumidity();
-    	    
-    	    // 최소값 추출 (새로 추가)
-    	    minTemperature = firstData.getMinTemperature();
-    	    minHumidity = firstData.getMinHumidity();
-    	    
-    	    // 현재 삽입된 dataDTO에 최대/최소값을 넣어줍니다.
-    	    dataDTO.setMaxTemperature(maxTemperature);
-    	    dataDTO.setMaxHumidity(maxHumidity);
-    	    dataDTO.setMinTemperature(minTemperature); // 최소 온도 설정
-    	    dataDTO.setMinHumidity(minHumidity);       // 최소 습도 설정
-    	}
-   
-    	log.info(dataDTO);
-
+        // 4. SSE 전송 (여기에 예외 처리 추가)
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(dataDTO);
 
-        sseEmitterManager.sendData(deviceId, json);
+        try {
+            // ▼▼▼ 예외 발생 지점 감싸기 ▼▼▼
+            sseEmitterManager.sendData(deviceId, json);
+            
+        } catch (Exception e) {
+            // SSE 전송 실패는 데이터 저장 성공과는 별개이므로 로그만 남기고 넘어갑니다.
+            // 여기서 에러를 잡지 않으면 클라이언트(센서 기기)에게 500 에러가 날아갑니다.
+            log.warn("SSE 실시간 알림 전송 실패 (저장은 완료됨): {}", e.getMessage());
+        }
 
-        return ResponseEntity.ok("저장 및 전송 완료");
+        // 5. 응답 반환 (전송 실패해도 저장은 성공했으므로 OK 반환)
+        return ResponseEntity.ok("저장 및 전송(시도) 완료");
     }
 }
