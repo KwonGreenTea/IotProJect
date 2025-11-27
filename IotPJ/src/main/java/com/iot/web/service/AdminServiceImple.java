@@ -25,6 +25,12 @@ public class AdminServiceImple implements AdminService {
     public List<OrderInfoDTO> retrieveOrderData() {
         return adminMapper.retrieveOrderData();
     }
+    
+    @Override
+	public int updateOrderIsActive(String orderId) {
+		 log.info("updateOrderIsActive()");
+		return adminMapper.updateOrderIsActive(orderId);
+	}
 
     @Override
     public void updateDeviceId(String orderId, String startDate) {
@@ -48,4 +54,6 @@ public class AdminServiceImple implements AdminService {
         log.info("createProduct 호출: {}", dto);
         adminMapper.insertProduct(dto);
     }
+
+	
 }

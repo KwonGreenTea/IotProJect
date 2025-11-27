@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +51,28 @@ public class AdminPortalController {
         return "admin/orders/list";
     }
 
+    
+ // 2. [API] 배송 시작 처리 (새로 추가)
+    // 경로: /api/admin/orders/{orderId}/ship
+    @PostMapping("/admin/orders/{orderId}/ship")
+    @ResponseBody // ★ 중요: 이게 있어야 HTML을 안 찾고 JSON/Text 데이터를 반환합니다.
+    public ResponseEntity<String> startShipping(@PathVariable String orderId) {
+        try {
+            log.info("배송 시작 요청 받음: Order ID {}", orderId);
+
+            // 서비스 호출 (DB 상태 변경: PENDING -> SHIPPING)
+            // adminService.startShipping(orderId); 
+
+            return ResponseEntity.ok("배송이 시작되었습니다."); // 200 OK
+
+        } catch (Exception e) {
+            log.error("배송 시작 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("오류 발생: " + e.getMessage());
+        }
+    }
+    
+    
     /** 운영자 주문 상세/모니터 */
     @GetMapping("/admin/orders/{orderId}")
     public String adminOrderMonitor(Model model, @PathVariable String orderId) {

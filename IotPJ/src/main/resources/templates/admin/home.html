@@ -1,80 +1,224 @@
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>관리자 홈</title>
-  <link rel="stylesheet" href="/css/base.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 | Fresh Chain</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 관리자 페이지 전용 스타일 */
+        body { background-color: #F5F7FB; }
+        
+        /* 사이드바 스타일 */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background: #212529; /* 다크 테마 */
+            color: #fff;
+            position: fixed;
+            top: 0; left: 0;
+            padding-top: 20px;
+            z-index: 1000;
+        }
+        .sidebar .nav-link {
+            color: #adb5bd;
+            padding: 15px 25px;
+            font-size: 1rem;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #fff;
+            background-color: #D42426; /* 브랜드 포인트 컬러 (Red) */
+        }
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 30px;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* 메인 컨텐츠 영역 (사이드바 너비만큼 밀기) */
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+        }
+
+        /* 카드 스타일 */
+        .stat-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .icon-box {
+            width: 50px; height: 50px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+        }
+    </style>
 </head>
-<body class="app-body">
-  <div class="app-shell">
+<body>
 
-    <!-- 상단 헤더 -->
-    <header class="page-header">
-      <div>
-        <h1 class="page-title">관리자 포털</h1>
-        <p class="page-subtitle">
-          상품, 주문, 온·습도 모니터링까지 한 곳에서 관리할 수 있습니다.
-        </p>
-      </div>
-      <!-- 필요하면 오른쪽에 프로필/로그아웃 버튼 등 추가 가능 -->
-      <!-- <div class="page-header-actions">...</div> -->
-    </header>
-
-    <!-- 메인 카드 그리드 -->
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <h2 class="card-title">관리 메뉴</h2>
-          <p class="card-subtitle">
-            자주 사용하는 관리 기능으로 바로 이동하세요.
-          </p>
+    <nav class="sidebar">
+        <a href="/admin" class="brand-logo">
+            <i class="fa-solid fa-temperature-low me-2"></i>Fresh Admin
+        </a>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="/admin">
+                    <i class="fa-solid fa-chart-pie me-3"></i>대시보드
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/orders">
+                    <i class="fa-solid fa-truck-fast me-3"></i>주문/배송 관리
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fa-solid fa-users me-3"></i>회원 관리
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fa-solid fa-gear me-3"></i>시스템 설정
+                </a>
+            </li>
+        </ul>
+        <div class="mt-auto p-4" style="position: absolute; bottom: 0; width: 100%;">
+            <a href="/logout" class="btn btn-outline-light w-100 btn-sm">로그아웃</a>
         </div>
-      </div>
+    </nav>
 
-      <div class="card-grid">
-        <article class="card-tile">
-          <h3 class="card-tile-title">상품 등록</h3>
-          <p class="card-tile-desc">
-            상품명, 가격, 임계 온/습도, 설명을 등록합니다.
-          </p>
-          <a class="btn btn-primary card-tile-link" href="/admin/products/new">
-            이동
-          </a>
-        </article>
+    <main class="main-content">
+        
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark">Dashboard</h2>
+                <p class="text-muted">실시간 배송 및 온/습도 모니터링 현황입니다.</p>
+            </div>
+            <div class="d-flex align-items-center bg-white p-2 rounded shadow-sm px-3">
+                <div class="me-3 text-end">
+                    <div class="fw-bold">관리자 님</div>
+                    <small class="text-muted">Master Admin</small>
+                </div>
+                <div class="bg-secondary rounded-circle" style="width: 40px; height: 40px;"></div>
+            </div>
+        </header>
 
-        <article class="card-tile">
-          <h3 class="card-tile-title">상품 목록</h3>
-          <p class="card-tile-desc">
-            등록된 상품을 확인하고 수정 및 관리합니다.
-          </p>
-          <a class="btn btn-soft card-tile-link" href="/admin/products">
-            이동
-          </a>
-        </article>
+        <div class="row g-4 mb-4">
+            
+            <div class="col-md-4">
+                <div class="card stat-card bg-white" onclick="location.href='/admin/orders?status=SHIPPING'">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary me-3">
+                            <i class="fa-solid fa-truck"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">현재 배송 중</h6>
+                            <h3 class="fw-bold mb-0" th:text="${totalShipping}">154</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <article class="card-tile">
-          <h3 class="card-tile-title">주문 목록</h3>
-          <p class="card-tile-desc">
-            주문 상태를 확인하고 모니터링 화면으로 이동합니다.
-          </p>
-          <a class="btn btn-soft card-tile-link" href="/admin/orders">
-            이동
-          </a>
-        </article>
+            <div class="col-md-4">
+                <div class="card stat-card bg-danger text-white" onclick="location.href='/admin/orders?status=SHIPPING&alert=true'">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="icon-box bg-white text-danger me-3">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-white-50 mb-1">온도 이탈 경고</h6>
+                            <h3 class="fw-bold mb-0" th:text="${alertCount}">3</h3>
+                        </div>
+                        <span class="badge bg-white text-danger ms-auto">조치 필요</span>
+                    </div>
+                </div>
+            </div>
 
-        <article class="card-tile">
-          <h3 class="card-tile-title">주문 모니터링</h3>
-          <p class="card-tile-desc">
-            주문 상세(온·습도 스트림, 배송 시작/완료)를 확인합니다.
-          </p>
-          <a class="btn btn-soft card-tile-link" href="/admin/orders/123">
-            샘플로 이동
-          </a>
-        </article>
-      </div>
-    </section>
+            <div class="col-md-4">
+                <div class="card stat-card bg-white">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="icon-box bg-success bg-opacity-10 text-success me-3">
+                            <i class="fa-solid fa-server"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">센서 가동률</h6>
+                            <h3 class="fw-bold mb-0"><span th:text="${sensorActive}">98</span>%</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  </div>
+        <div class="row g-4">
+            
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="fw-bold mb-0">📉 주간 온도 이탈 발생 추이</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="issueChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="fw-bold mb-0">⚡ 빠른 작업</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/admin/orders" class="btn btn-outline-dark p-3 text-start">
+                                <i class="fa-solid fa-list me-2"></i> 전체 주문 목록 조회
+                            </a>
+                            <a href="#" class="btn btn-outline-dark p-3 text-start">
+                                <i class="fa-solid fa-file-export me-2"></i> 월간 리포트 다운로드
+                            </a>
+                            <a href="#" class="btn btn-outline-danger p-3 text-start">
+                                <i class="fa-solid fa-bell me-2"></i> 긴급 알림 발송 설정
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 대시보드 차트 (Mock Data)
+        const ctx = document.getElementById('issueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['월', '화', '수', '목', '금', '토', '일'],
+                datasets: [{
+                    label: '이상 온도 감지 건수',
+                    data: [2, 1, 5, 3, 2, 0, 1], // 실제로는 서버에서 받은 데이터 활용
+                    backgroundColor: '#D42426',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,59 +1,149 @@
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>상품 상세</title>
-  <link rel="stylesheet" href="/css/shop.css" />
-  <script type="module">
-    import { renderDetail } from "/js/shop.js";
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      // URL에서 /catalog/{productId}의 {productId} 추출
-      const productId = location.pathname.split('/').pop();
-      const root = document.querySelector('#detail');
-
-      try {
-        // 단일 상품 조회 API 호출
-        const res = await fetch(`/productList/${productId}`);
-        if (!res.ok) throw new Error("상품 조회 실패: " + res.status);
-        const product = await res.json();
-
-        if (!product) {
-          root.innerHTML = "<p>상품을 찾을 수 없습니다.</p>";
-          return;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${productInfoById.productName} + ' - 상세정보'">상품 상세</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 테마 스타일 유지 */
+        :root { --xmas-red: #D42426; --xmas-dark: #1A1A1A; --xmas-bg: #F8F9FA; }
+        body { background-color: var(--xmas-bg); color: var(--xmas-dark); padding-bottom: 80px; }
+        .navbar-custom { background-color: var(--xmas-red); }
+        .text-xmas-red { color: var(--xmas-red); }
+        
+        /* 상세페이지 전용 스타일 */
+        .product-img-container {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #eee;
         }
-
-        // 상세 페이지 렌더
-        renderDetail(product, root);
-      } catch (err) {
-        console.error(err);
-        root.innerHTML = "<p>상품 조회 중 오류가 발생했습니다.</p>";
-      }
-    });
-  </script>
+        .spec-box {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
-<body class="shop-body">
-  <div class="shop-shell">
+<body>
 
-    <!-- 상단 헤더 -->
-    <header class="shop-header">
-      <div class="shop-header-main">
-        <h1 class="shop-title">상품 상세</h1>
-        <p class="shop-subtitle">
-          상품 정보를 확인하고 장바구니에 담아 주문을 진행하세요.
-        </p>
-      </div>
-      <div class="shop-toolbar">
-        <a class="btn secondary" href="/catalog">목록</a>
-        <a class="btn secondary" href="/cart">장바구니</a>
-      </div>
-    </header>
+    <nav class="navbar navbar-custom sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand text-white fw-bold" href="/">
+                <i class="fa-solid fa-arrow-left me-2"></i>MERRY SHOP
+            </a>
+        </div>
+    </nav>
 
-    <!-- 상세 영역 (JS에서 렌더링) -->
-    <section class="shop-card product-detail-card">
-      <div id="detail" class="product-detail-root"></div>
-    </section>
-  </div>
+    <div class="container py-4"> <div class="row g-4">
+            <div class="col-md-6">
+                <div class="product-img-container shadow-sm">
+                    <img th:src="|https://placehold.co/600x600/f8f9fa/D42426?text=${productInfoById.productName}|" 
+                         class="img-fluid w-100" 
+                         th:alt="${productInfoById.productName}">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <p class="text-muted mb-1">
+                    <i class="fa-solid fa-shop"></i> 판매자: <span th:text="${productInfoById.sellerId}">SellerID</span>
+                </p>
+                
+                <h2 class="fw-bold mb-3" th:text="${productInfoById.productName}">상품명</h2>
+                
+                <h3 class="text-xmas-red fw-bold mb-4 border-bottom pb-3">
+                    <span th:text="${#numbers.formatInteger(productInfoById.price, 0, 'COMMA')}">0</span>원
+                </h3>
+
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-circle-info text-secondary me-2"></i>상품 상세 스펙</h5>
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
+                        <div class="spec-box text-center">
+                            <i class="fa-solid fa-temperature-half fa-2x text-danger mb-2"></i>
+                            <div class="text-muted small">적정 온도</div>
+                            <div class="fw-bold">
+                                <span th:text="${productInfoById.minTemperature}"></span>°C ~ 
+                                <span th:text="${productInfoById.maxTemperature}"></span>°C
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="spec-box text-center">
+                            <i class="fa-solid fa-droplet fa-2x text-primary mb-2"></i>
+                            <div class="text-muted small">적정 습도</div>
+                            <div class="fw-bold">
+                                <span th:text="${productInfoById.minHumidity}"></span>% ~ 
+                                <span th:text="${productInfoById.maxHumidity}"></span>%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 d-md-block">
+					<button class="btn btn-outline-dark btn-lg px-4 me-md-2" 
+					        type="button" 
+					        th:onclick="addToCart([[${productInfoById.productId}]])"> 장바구니 담기
+					</button><button class="btn btn-danger btn-lg px-5" type="button">바로 구매하기</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-12">
+                <h4 class="fw-bold border-bottom pb-2 mb-3">상품 상세 설명</h4>
+                <div class="bg-white p-4 rounded border text-secondary">
+                    <p>이 상품은 <span th:text="${productInfoById.sellerId}"></span>님이 판매하는 품질 좋은 제품입니다.</p>
+                    <p>크리스마스 시즌을 맞아 특별한 가격에 제공해 드립니다. <br>
+                       상세 스펙에 명시된 온도와 습도 범위를 확인하시고 구매해 주세요.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav class="fixed-bottom bg-white border-top shadow-lg p-3 d-md-none">
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-dark flex-grow-1">장바구니</button>
+            <button class="btn btn-danger flex-grow-1">구매하기</button>
+        </div>
+    </nav>
+
+	<div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
+	    <div class="modal-dialog modal-dialog-centered">
+	        <div class="modal-content">
+	            <div class="modal-header border-0">
+	                <h5 class="modal-title fw-bold"><i class="fa-solid fa-check-circle text-success me-2"></i>알림</h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	            </div>
+	            <div class="modal-body text-center py-4">
+	                <p class="mb-0 fs-5">상품이 장바구니에 담겼습니다!</p>
+	            </div>
+	            <div class="modal-footer border-0 justify-content-center gap-2">
+	                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">계속 쇼핑하기</button>
+	                <a href="/cart" class="btn btn-danger px-4">장바구니 이동</a>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
+	<script>
+	    function addToCart(productId) {
+	        // 실제로는 여기서 fetch('/cart/add', ...) 로 서버에 DB 저장을 요청해야 합니다.
+	        // 현재는 UI 동작 확인을 위해 성공했다고 가정하고 모달만 띄웁니다.
+	        
+	        console.log("장바구니 담기 시도: Product ID " + productId);
+	        
+	        // 부트스트랩 모달 띄우기
+	        const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+	        cartModal.show();
+	    }
+	</script>
+	
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

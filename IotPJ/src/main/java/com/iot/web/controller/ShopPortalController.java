@@ -28,11 +28,6 @@ public class ShopPortalController {
         return "user/order/orderDetail";
     }
 
-    /** 장바구니 (파일 만들었을 때만 사용) */
-    @GetMapping("/cart")
-    public String cart() {
-        // templates/user/cart/cart.html
-        return "cart/index";
-    }
+   
     
 }

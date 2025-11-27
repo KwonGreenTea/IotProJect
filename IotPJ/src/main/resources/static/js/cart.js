@@ -1,4 +1,4 @@
-const CART_KEY = "cart";
+/*const CART_KEY = "cart";
 const getCart = () => JSON.parse(localStorage.getItem(CART_KEY) || "[]");
 const setCart = (c) => localStorage.setItem(CART_KEY, JSON.stringify(c));
 const fmt = (n) => Number(n || 0).toLocaleString();
@@ -139,3 +139,4 @@ export function renderCart(root) {
   };
   draw();
 }
+*/

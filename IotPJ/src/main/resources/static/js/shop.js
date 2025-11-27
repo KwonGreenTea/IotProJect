@@ -1,4 +1,4 @@
-// 공용: 장바구니 로컬스토리지
+/*// 공용: 장바구니 로컬스토리지
 const CART_KEY = "cart";
 const getCart = () => JSON.parse(localStorage.getItem(CART_KEY) || "[]");
 const setCart = (c) => localStorage.setItem(CART_KEY, JSON.stringify(c));
@@ -120,3 +120,4 @@ export function renderDetail(product, root) {
     });
   };
 }
+*/

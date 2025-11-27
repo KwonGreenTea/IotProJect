@@ -23,11 +23,11 @@ public class UserBoardController {
 	@Autowired
 	private userBoardService userBoardService;
 
-	@GetMapping({ "/", "/catalog" })
-	public String caltalog() {
-
-		return "shop/index";
-	}
+	/*
+	 * @GetMapping({ "/", "/catalog" }) public String caltalog() {
+	 * 
+	 * return "shop/index"; }
+	 */
 	
 	@GetMapping("/catalog/{productId}")
 	public String caltalogById() {
@@ -38,9 +38,8 @@ public class UserBoardController {
 	
 	
 
-	@GetMapping({ "/productList" })
-	@ResponseBody
-	public List<ProductInfoDTO> productList() {
+	@GetMapping({ "/" })
+	public String productList(Model model) {
 
 		log.info("productList");
 
@@ -48,21 +47,38 @@ public class UserBoardController {
 
 		log.info("상품 리스트 : " + productList);
 
-		return userBoardService.selectProductList();
+		model.addAttribute("productList", productList);
+		
+		return "shop/index";
 	}
 
 	
 
-	  @GetMapping("/productList/{productId}") 
-	  @ResponseBody
-	  public ProductInfoDTO selectProductById(@PathVariable Integer productId) {
-	  log.info("productList/{}", productId);
+	@GetMapping("/productList/{productId}")
+	public String selectProductById(@PathVariable Integer productId, Model model) {
+	    
+	    log.info("productList/{}", productId);
 	  
-	  ProductInfoDTO productInfoById = userBoardService.selectProductById(productId);
+	    // 서비스에서 데이터 조회
+	    ProductInfoDTO productInfoById = userBoardService.selectProductById(productId);
 	  
-	  log.info("조회 상품 : " + productInfoById);
+	    log.info("조회 상품 : " + productInfoById);
 	  
-	  return productInfoById;
-	 
-	  }
+	    // 타임리프로 데이터 전달 ("productInfoById" 라는 이름으로)
+	    model.addAttribute("productInfoById", productInfoById);
+	  
+	    // templates/shop/detail.html 로 이동
+	    return "shop/detail";
+	}
+
+	 /** 장바구니 (파일 만들었을 때만 사용) */
+    @GetMapping("/cart")
+    public String cart() {
+    	
+    	log.info("cart()");
+        // templates/user/cart/cart.html
+        return "cart/index";
+    }
+
+
 }

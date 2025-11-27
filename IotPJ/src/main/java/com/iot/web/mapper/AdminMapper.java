@@ -13,6 +13,8 @@ import com.iot.web.domain.ProductInfoDTO;
 public interface AdminMapper {
 
 	List<OrderInfoDTO> retrieveOrderData();
+	
+	int updateOrderIsActive(String orderId);
 
 	DeviceInfoDTO retrieveDeviceData(String orderId);
 

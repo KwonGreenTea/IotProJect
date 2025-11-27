@@ -50,6 +50,15 @@
         SELECT *
           FROM ORDER_INFO
     </select>
+    
+    
+    <!--배송상태 Y로 업데이트-->
+    <update id="updateOrderStatusToActive" parameterType="int">
+        UPDATE ORDER_INFO
+        SET IS_ACTIVE = 'Y'
+        WHERE ORDER_ID = #{orderId}
+    </update>
+    
 
     <!-- 특정 주문 ID로 주문 조회 -->
     <select id="retrieveOrderDataForOrderId" resultMap="orderResultMap">

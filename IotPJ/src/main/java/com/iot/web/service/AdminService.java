@@ -10,7 +10,9 @@ public interface AdminService {
 
     // 주문/디바이스 관련
     List<OrderInfoDTO> retrieveOrderData();
-
+    
+    int updateOrderIsActive(String orderId);
+    
     void updateDeviceId(String orderId, String startDate);
 
     DeviceInfoDTO retrieveDeviceData(String orderId);
