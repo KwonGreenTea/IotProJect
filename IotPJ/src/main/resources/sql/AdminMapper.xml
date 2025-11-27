@@ -51,9 +51,8 @@
           FROM ORDER_INFO
     </select>
     
-    
-    <!--배송상태 Y로 업데이트-->
-    <update id="updateOrderStatusToActive" parameterType="int">
+    <!--주문 상태 Y로 바꾸기-->
+    <update id="updateOrderIsActive" parameterType="String">
         UPDATE ORDER_INFO
         SET IS_ACTIVE = 'Y'
         WHERE ORDER_ID = #{orderId}

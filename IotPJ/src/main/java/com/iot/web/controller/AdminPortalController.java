@@ -26,8 +26,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AdminPortalController {
 
-    @Autowired
-    private AdminService adminService;
+	    @Autowired
+	    private AdminService adminService;
 
     /** 운영자 홈 */
     @GetMapping("/admin")
@@ -50,18 +50,17 @@ public class AdminPortalController {
         // templates/admin/orders/list.html
         return "admin/orders/list";
     }
-
+    
     
  // 2. [API] 배송 시작 처리 (새로 추가)
-    // 경로: /api/admin/orders/{orderId}/ship
+    // 경로: 
     @PostMapping("/admin/orders/{orderId}/ship")
     @ResponseBody // ★ 중요: 이게 있어야 HTML을 안 찾고 JSON/Text 데이터를 반환합니다.
     public ResponseEntity<String> startShipping(@PathVariable String orderId) {
         try {
             log.info("배송 시작 요청 받음: Order ID {}", orderId);
 
-            // 서비스 호출 (DB 상태 변경: PENDING -> SHIPPING)
-            // adminService.startShipping(orderId); 
+            adminService.updateOrderIsActive(orderId);
 
             return ResponseEntity.ok("배송이 시작되었습니다."); // 200 OK
 
@@ -71,6 +70,8 @@ public class AdminPortalController {
                                  .body("오류 발생: " + e.getMessage());
         }
     }
+        
+      
     
     
     /** 운영자 주문 상세/모니터 */
