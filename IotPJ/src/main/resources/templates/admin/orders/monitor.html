@@ -209,201 +209,233 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        
-        // 1. 서버 데이터 바인딩
-        const deviceId = /*[[${deviceId}]]*/ 'UNKNOWN';
-        const orderId = /*[[${orderId}]]*/ 0;
-        
-        console.log(`모니터링 시작 - Device: ${deviceId}, Order: ${orderId}`);
+	<script th:inline="javascript">
+	        /*<![CDATA[*/
+	        
+	        // 1. 서버 데이터 바인딩 확인
+	        const deviceId = /*[[${deviceId}]]*/ 'UNKNOWN';
+	        const orderId = /*[[${orderId}]]*/ 0;
+	        
+	        // [디버깅 1] 초기화 값 확인
+	        console.log(`[AdminMonitor] [1] 초기화 - Device: ${deviceId}, Order: ${orderId}`);
 
-        // 2. Chart.js 설정
-        const ctx = document.getElementById('sensorChart').getContext('2d');
-        const sensorChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [], // X축 (시간)
-                datasets: [
-                    {
-                        label: '온도 (°C)',
-                        data: [],
-                        borderColor: '#dc3545', // Red
-                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                        borderWidth: 3,
-                        pointRadius: 3,
-                        yAxisID: 'y',
-                        tension: 0.3, // 부드러운 곡선
-                        fill: true
-                    },
-                    {
-                        label: '습도 (%)',
-                        data: [],
-                        borderColor: '#0d6efd', // Blue
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        borderDash: [5, 5], // 점선
-                        yAxisID: 'y1',
-                        tension: 0.3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: false, // 실시간 성능 최적화 (애니메이션 끔)
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                scales: {
-                    x: { display: true },
-                    y: { 
-                        type: 'linear', display: true, position: 'left',
-                        title: { display: true, text: '온도 (°C)' },
-                        suggestedMin: 10, suggestedMax: 30
-                    },
-                    y1: { 
-                        type: 'linear', display: true, position: 'right',
-                        title: { display: true, text: '습도 (%)' },
-                        grid: { drawOnChartArea: false },
-                        suggestedMin: 30, suggestedMax: 80
-                    }
-                }
-            }
-        });
+	        // 2. Chart.js 설정
+	        const ctx = document.getElementById('sensorChart').getContext('2d');
+	        const sensorChart = new Chart(ctx, {
+	            type: 'line',
+	            data: {
+	                labels: [], 
+	                datasets: [
+	                    {
+	                        label: '온도 (°C)',
+	                        data: [],
+	                        borderColor: '#dc3545', 
+	                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+	                        borderWidth: 3,
+	                        pointRadius: 3,
+	                        yAxisID: 'y',
+	                        tension: 0.3, 
+	                        fill: true
+	                    },
+	                    {
+	                        label: '습도 (%)',
+	                        data: [],
+	                        borderColor: '#0d6efd',
+	                        backgroundColor: 'transparent',
+	                        borderWidth: 2,
+	                        pointRadius: 0,
+	                        borderDash: [5, 5],
+	                        yAxisID: 'y1',
+	                        tension: 0.3
+	                    }
+	                ]
+	            },
+	            options: {
+	                responsive: true,
+	                maintainAspectRatio: false,
+	                animation: false,
+	                interaction: { mode: 'index', intersect: false },
+	                scales: {
+	                    x: { display: true },
+	                    y: { 
+	                        type: 'linear', display: true, position: 'left',
+	                        title: { display: true, text: '온도 (°C)' },
+	                        suggestedMin: 10, suggestedMax: 30
+	                    },
+	                    y1: { 
+	                        type: 'linear', display: true, position: 'right',
+	                        title: { display: true, text: '습도 (%)' },
+	                        grid: { drawOnChartArea: false },
+	                        suggestedMin: 30, suggestedMax: 80
+	                    }
+	                }
+	            }
+	        });
 
-    
-		// 3. SSE 연결 및 데이터 처리
-		        let eventSource = null;
+	        // 3. SSE 연결 및 데이터 처리
+	        let eventSource = null;
 
-		        function connectSensor() {
-		            if(!deviceId || deviceId === 'UNKNOWN') return;
+	        function connectSensor() {
+	            if(!deviceId || deviceId === 'UNKNOWN') {
+	                console.warn("[AdminMonitor] Device ID가 없어 연결을 중단합니다.");
+	                return;
+	            }
 
-		            // SSE 연결
-		            eventSource = new EventSource(`/data/stream/${deviceId}`);
+	            const sseUrl = `/data/stream/${deviceId}`;
+	            console.log(`[AdminMonitor] [2] SSE 연결 시도: ${sseUrl}`);
 
-		            eventSource.addEventListener("newData", function(event) {
-		                const d = JSON.parse(event.data);
-		                
-		                // (1) 현재 값 업데이트 (애니메이션 효과)
-		                updateValue('currTemp', d.temperature?.toFixed(1));
-		                updateValue('currHumid', d.humidity);
+	            // SSE 연결
+	            eventSource = new EventSource(sseUrl);
 
-		                // (2) 통계 값 업데이트
-		                if(d.maxTemperature != null) document.getElementById('tempMax').innerText = d.maxTemperature.toFixed(1);
-		                if(d.minTemperature != null) document.getElementById('tempMin').innerText = d.minTemperature.toFixed(1);
-		                
-		                if(d.maxHumidity != null) document.getElementById('humidMax').innerText = d.maxHumidity;
-		                if(d.minHumidity != null) document.getElementById('humidMin').innerText = d.minHumidity;
+	            // [디버깅 3] 연결 성공 시
+	            eventSource.onopen = function() {
+	                console.log("[AdminMonitor] [3] SSE 연결 성공 (Connected)");
+	            };
 
-		                // (3) 시간 업데이트 및 차트 갱신
-		                if(d.measuredAt) {
-		                    const timeOnly = d.measuredAt.split(' ')[1] || d.measuredAt;
-		                    document.getElementById('lastUpdate').innerText = timeOnly;
-		                    
-		                    updateChart(timeOnly, d.temperature, d.humidity);
-		                    
-		                    // ▼▼▼ [추가된 부분] 이벤트 로그 자동 기록 로직 ▼▼▼
-		                    // 예시: 온도가 10도를 넘으면 경고 로그 추가
-		                    if (d.temperature != null && d.temperature > 10.0) {
-		                        addLog('경고', `온도 이탈 감지 (${d.temperature.toFixed(1)}°C)`, d.measuredAt);
-		                    }
-		                }
-		            });
+	            // [디버깅용] 이름 없는 이벤트 수신 확인 (혹시 백엔드에서 이름을 안 보냈을 경우 대비)
+	            eventSource.onmessage = function(event) {
+	                console.log("[AdminMonitor] [DEBUG] 이름 없는 메시지 수신:", event.data);
+	            };
 
-		            eventSource.onerror = (err) => {
-		                console.error("SSE 연결 불안정:", err);
-		                // 연결 끊김 시 로그에 표시 (선택사항)
-		                // addLog('정보', '센서 연결이 불안정합니다.', new Date().toLocaleString());
-		            };
-		        }
+	            eventSource.addEventListener("newData", function(event) {
+	                // [디버깅 4] 데이터 수신 확인
+	                console.log("[AdminMonitor] [4] Raw Data 수신:", event.data);
 
-		        // ▼▼▼ [필수 추가] 로그를 화면(Sidebar)에 추가하는 함수 ▼▼▼
-		        function addLog(type, msg, fullTime) {
-		            const list = document.getElementById('eventLogList');
-		            if(!list) return; // HTML에 리스트가 없으면 패스
+	                try {
+	                    const d = JSON.parse(event.data);
+	                    console.log("[AdminMonitor] [5] JSON 파싱 완료:", d);
+	                    
+	                    // (1) 현재 값 업데이트 (애니메이션 효과)
+	                    updateValue('currTemp', d.temperature?.toFixed(1));
+	                    updateValue('currHumid', d.humidity);
 
-		            const timeOnly = fullTime.split(' ')[1] || fullTime; // 시간만 추출
+	                    // (2) 통계 값 업데이트
+	                    if(d.maxTemperature != null) updateText('tempMax', d.maxTemperature.toFixed(1));
+	                    if(d.minTemperature != null) updateText('tempMin', d.minTemperature.toFixed(1));
+	                    
+	                    if(d.maxHumidity != null) updateText('humidMax', d.maxHumidity);
+	                    if(d.minHumidity != null) updateText('humidMin', d.minHumidity);
 
-		            // 뱃지 색상 결정
-		            let badgeClass = 'bg-secondary';
-		            if (type === '경고') badgeClass = 'bg-danger';
-		            if (type === '정상') badgeClass = 'bg-success';
+	                    // (3) 시간 업데이트 및 차트 갱신
+	                    if(d.measuredAt) {
+	                        const timeOnly = d.measuredAt.split(' ')[1] || d.measuredAt;
+	                        updateText('lastUpdate', timeOnly);
+	                        
+	                        updateChart(timeOnly, d.temperature, d.humidity);
+	                        
+	                        // 이벤트 로그 기록
+	                        if (d.temperature != null && d.temperature > 10.0) {
+	                            addLog('경고', `온도 이탈 감지 (${d.temperature.toFixed(1)}°C)`, d.measuredAt);
+	                        }
+	                    }
+	                } catch (e) {
+	                    console.error("[AdminMonitor] ❌ 데이터 처리 중 에러:", e);
+	                }
+	            });
 
-		            // li 태그 생성
-		            const li = document.createElement('li');
-		            li.className = "list-group-item d-flex justify-content-between px-0 animate__animated animate__fadeIn"; // 애니메이션 효과 클래스(선택)
-		            
-		            li.innerHTML = `
-		                <span>
-		                    <span class="badge ${badgeClass} me-2">${type}</span>${msg}
-		                </span>
-		                <span class="text-muted small">${timeOnly}</span>
-		            `;
+	            eventSource.onerror = (err) => {
+	                console.error("[AdminMonitor] ❌ SSE 연결 끊김/에러:", err);
+	            };
+	        }
 
-		            // 리스트의 맨 위에 추가 (prepend)
-		            list.prepend(li);
-		            
-		            // 로그가 너무 많이 쌓이면 오래된 것 삭제 (예: 20개 유지)
-		            if (list.children.length > 20) {
-		                list.removeChild(list.lastChild);
-		            }
-		        }
+	        // --- Helper Functions ---
 
-        // 값 업데이트 시 깜빡임 효과 주는 함수
-        function updateValue(elementId, value) {
-            if(value == null) return;
-            const el = document.getElementById(elementId);
-            el.innerText = value;
-            
-            // 클래스 제거 후 재추가로 애니메이션 리셋
-            el.classList.remove('flash');
-            void el.offsetWidth; // 리플로우 강제 (브라우저가 변경 인식하게 함)
-            el.classList.add('flash');
-        }
+	        // 단순 텍스트 업데이트 (DOM 존재 여부 체크 포함)
+	        function updateText(id, val) {
+	            const el = document.getElementById(id);
+	            if(el) el.innerText = val;
+	            // else console.warn(`[AdminMonitor] DOM 요소 없음: ${id}`);
+	        }
 
-        // 차트 데이터 추가 및 이동 (최근 20개 유지)
-        function updateChart(label, temp, humid) {
-            sensorChart.data.labels.push(label);
-            sensorChart.data.datasets[0].data.push(temp);
-            sensorChart.data.datasets[1].data.push(humid);
+	        // 값 업데이트 시 깜빡임 효과 주는 함수
+	        function updateValue(elementId, value) {
+	            if(value == null) return;
+	            
+	            const el = document.getElementById(elementId);
+	            if(!el) {
+	                console.warn(`[AdminMonitor] DOM 요소 없음: ${elementId}`);
+	                return;
+	            }
 
-            if(sensorChart.data.labels.length > 20) {
-                sensorChart.data.labels.shift();
-                sensorChart.data.datasets[0].data.shift();
-                sensorChart.data.datasets[1].data.shift();
-            }
-            sensorChart.update();
-        }
+	            el.innerText = value;
+	            
+	            // 클래스 제거 후 재추가로 애니메이션 리셋
+	            el.classList.remove('flash');
+	            void el.offsetWidth; // 리플로우 강제
+	            el.classList.add('flash');
+	        }
 
-        // 4. 배송 완료 버튼 로직
-        document.getElementById('btnComplete').addEventListener('click', function() {
-            if(!confirm("배송을 완료 처리하고 모니터링을 종료하시겠습니까?")) return;
+	        // 차트 데이터 추가 및 이동
+	        function updateChart(label, temp, humid) {
+	            sensorChart.data.labels.push(label);
+	            sensorChart.data.datasets[0].data.push(temp);
+	            sensorChart.data.datasets[1].data.push(humid);
 
-            // POST /api/admin/orders/{orderId}/complete
-            fetch(`/api/admin/orders/${orderId}/complete`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(res => {
-                if(res.ok) {
-                    alert("✅ 배송이 완료되었습니다.");
-                    if(eventSource) eventSource.close(); // SSE 연결 끊기
-                    window.close(); // 창 닫기
-                    // 만약 팝업이 아니라면 location.href = '/admin/orders';
-                } else {
-                    alert("처리 실패. 다시 시도해주세요.");
-                }
-            })
-            .catch(err => console.error(err));
-        });
+	            if(sensorChart.data.labels.length > 20) {
+	                sensorChart.data.labels.shift();
+	                sensorChart.data.datasets[0].data.shift();
+	                sensorChart.data.datasets[1].data.shift();
+	            }
+	            sensorChart.update();
+	        }
 
-        // 초기 실행
-        connectSensor();
+	        // 로그 추가 함수
+	        function addLog(type, msg, fullTime) {
+	            const list = document.getElementById('eventLogList');
+	            if(!list) return; 
 
-        /*]]>*/
-    </script>
+	            const timeOnly = fullTime.split(' ')[1] || fullTime;
+
+	            let badgeClass = 'bg-secondary';
+	            if (type === '경고') badgeClass = 'bg-danger';
+	            if (type === '정상') badgeClass = 'bg-success';
+
+	            const li = document.createElement('li');
+	            li.className = "list-group-item d-flex justify-content-between px-0 animate__animated animate__fadeIn";
+	            
+	            li.innerHTML = `
+	                <span>
+	                    <span class="badge ${badgeClass} me-2">${type}</span>${msg}
+	                </span>
+	                <span class="text-muted small">${timeOnly}</span>
+	            `;
+
+	            list.prepend(li);
+	            
+	            if (list.children.length > 20) {
+	                list.removeChild(list.lastChild);
+	            }
+	        }
+
+	        // 4. 배송 완료 버튼 로직
+	        const btnComplete = document.getElementById('btnComplete');
+	        if(btnComplete) {
+	            btnComplete.addEventListener('click', function() {
+	                if(!confirm("배송을 완료 처리하고 모니터링을 종료하시겠습니까?")) return;
+
+	                console.log("[AdminMonitor] 배송 완료 요청 전송...");
+
+	                fetch(`/api/admin/orders/${orderId}/complete`, {
+	                    method: 'POST',
+	                    headers: { 'Content-Type': 'application/json' }
+	                })
+	                .then(res => {
+	                    if(res.ok) {
+	                        alert("✅ 배송이 완료되었습니다.");
+	                        if(eventSource) eventSource.close(); 
+	                        window.close(); 
+	                    } else {
+	                        alert("처리 실패. 다시 시도해주세요.");
+	                    }
+	                })
+	                .catch(err => console.error("[AdminMonitor] 완료 처리 중 에러:", err));
+	            });
+	        }
+
+	        // 초기 실행
+	        connectSensor();
+
+	        /*]]>*/
+	    </script>
 </body>
 </html>

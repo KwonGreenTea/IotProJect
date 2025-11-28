@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
 import com.iot.web.domain.ProductInfoDTO;
 import com.iot.web.service.userBoardService;
@@ -62,7 +63,7 @@ public class UserBoardController {
 	@GetMapping("/productList/{productId}")
 	public String selectProductById(@PathVariable Integer productId, Model model) {
 	    
-	    log.info("productList/{}", productId);
+	    log.info("productList : ", productId);
 	  
 	    // 서비스에서 데이터 조회
 	    ProductInfoDTO productInfoById = userBoardService.selectProductById(productId);
@@ -115,6 +116,61 @@ public class UserBoardController {
     }
 
     
+    @GetMapping("/order/list")
+    public String userOrderList(Model model) {
+        
+    	log.info("userOrderList()");
+        // 1. 서비스 호출
+        // (Service 내부에서 userId="test"로 고정해서 DB 조회를 수행합니다)
+        List<OrderInfoDTO> myOrderList = userBoardService.selectOrderList();
+        
+        // 2. 로그 확인 (개발 편의용)
+         log.info("조회된 주문 건수: " + myOrderList.size());
+
+        // 3. 모델에 담기
+        // HTML에서 th:each="order : ${myOrderList}" 로 사용할 이름입니다.
+        model.addAttribute("myOrderList", myOrderList);
+        
+        // 4. 뷰 페이지로 이동 (templates/shop/order.html)
+        return "shop/order";
+    }
+    
+    
+    // 사용자 모니터링 부분 
+    /** * 사용자용 주문 상세 모니터링 페이지 
+     * 경로: GET /order/monitor/{orderId}
+     */
+    @GetMapping("/order/monitor/{orderId}")
+    public String userOrderMonitor(@PathVariable String orderId, Model model) {
+        log.info("사용자 모니터링 진입: orderId = {}", orderId);
+
+        // 1. 센서(장비) 데이터 정보 조회
+        // (주의: 사용자는 매핑 로직 updateDeviceId를 실행하지 않음! 조회만 수행)
+        DeviceInfoDTO deviceInfoDTO = userBoardService.retrieveDeviceData(orderId);
+        
+        // 2. 주문 상세 데이터 조회
+        OrderInfoDTO orderInfoDTO = userBoardService.retrieveOrderDataForOrderId(orderId);
+
+        // 3. 로그 확인
+        log.info("deviceInfoDTO : {}", deviceInfoDTO);
+        log.info("orderInfoDTO : {}", orderInfoDTO);
+
+        // 4. 모델에 담기
+        // (배송 전이라 device가 없을 수도 있으므로 null 체크가 필요할 수 있음)
+        if (deviceInfoDTO != null) {
+            model.addAttribute("deviceInfoDTO", deviceInfoDTO);
+            model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
+        } else {
+            // 아직 배송 시작 전이거나 센서가 없는 경우 처리
+            model.addAttribute("deviceId", ""); 
+        }
+        
+        model.addAttribute("orderInfoDTO", orderInfoDTO);
+        model.addAttribute("orderId", orderId); // HTML에서 쓰기 위해 명시적으로 추가
+
+        // 아까 만든 사용자용 모니터링 화면 (templates/shop/monitor.html)
+        return "shop/monitor";
+    }
     
     
     

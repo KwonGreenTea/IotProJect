@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
 import com.iot.web.domain.ProductInfoDTO;
 import com.iot.web.domain.TestDTO;
@@ -57,6 +58,32 @@ public class userBoardServiceImple implements userBoardService {
 		
 		return userBoardMapper.createOrder(orderInfoDTO);
 	
+	}
+
+	
+	// 주문 목록 조회 
+	@Override
+	public List<OrderInfoDTO> selectOrderList() {
+		
+		log.info("selectOrderList");
+			
+		
+		String userId = "test";
+		
+		return userBoardMapper.selectOrderList(userId);
+	}
+
+	@Override
+	public DeviceInfoDTO retrieveDeviceData(String orderId) {
+		
+		
+		 return userBoardMapper.retrieveDeviceData(orderId);
+	}
+
+	@Override
+	public OrderInfoDTO retrieveOrderDataForOrderId(String orderId) {
+		
+		return userBoardMapper.retrieveOrderDataForOrderId(orderId);
 	}
 	
 	

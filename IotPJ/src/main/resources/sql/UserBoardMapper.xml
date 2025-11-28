@@ -27,6 +27,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isActive" column="IS_ACTIVE"/>
     </resultMap>
 
+	<resultMap id="deviceResultMap" type="com.iot.web.domain.DeviceInfoDTO">
+        <id property="deviceId" column="DEVICE_ID" />
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="startDate" column="START_DATE" />
+        <result property="endDate" column="END_DATE" />
+        <result property="isActive" column="IS_ACTIVE" />
+        <result property="orderId" column="ORDER_ID" />
+    </resultMap>
+
 
     <select id="selectProductList" resultMap="productResultMap">
         SELECT *
@@ -60,5 +69,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{totalPrice},
             #{isActive}  )
     </insert>
+
+	<select id="selectOrderList" resultMap="orderResultMap">
+        SELECT * FROM ORDER_INFO
+        WHERE USER_ID = #{userId}
+        ORDER BY ORDER_ID DESC
+    </select>
+    
+    
+    <select id="retrieveDeviceData"  resultMap="deviceResultMap">
+        SELECT *
+        FROM DEVICE_INFO
+        WHERE ORDER_ID = #{orderId}
+          AND IS_ACTIVE = 'Y'  
+     </select>
+
+    <select id="retrieveOrderDataForOrderId" resultMap="orderResultMap">
+        SELECT *
+        FROM ORDER_INFO
+        WHERE ORDER_ID = #{orderId}
+    </select>
+
+
 
 </mapper>
