@@ -16,6 +16,8 @@ public class NotificationController {
 
     @GetMapping("/data/stream/{orderId}")
     public SseEmitter stream(@PathVariable String orderId) {
+    	// 알림
+    	
         // SSE 연결 호출
         return sseEmitterManager.subscribe(orderId);
     }
