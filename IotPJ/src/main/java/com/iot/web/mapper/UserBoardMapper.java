@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.iot.web.domain.OrderInfoDTO;
 import com.iot.web.domain.ProductInfoDTO;
 
 
@@ -15,6 +16,7 @@ public interface UserBoardMapper {
 						 
 	ProductInfoDTO selectProductById(int productId);
 	
-	
+	// 주문 넣기
+	int createOrder(OrderInfoDTO orderInfoDTO);
 	
 }
