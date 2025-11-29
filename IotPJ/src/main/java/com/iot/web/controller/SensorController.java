@@ -51,7 +51,8 @@ public class SensorController {
         
         // 2. 데이터 파싱 및 DB 저장
         String deviceId = (String) jsonData.get("sensorCd");
-        String orderId = sensorService.retrieveOrderIdByDeviceId(deviceId);
+        //String orderId = sensorService.retrieveOrderIdByDeviceId(deviceId);
+        String userId = sensorService.retrieveUserIdByDeviceId(deviceId);
         
         SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
         dataDTO.setDeviceId(deviceId);
@@ -83,7 +84,7 @@ public class SensorController {
         try {
             sseEmitterManager.sendData(deviceId, json);
             
-            sseEmitterManager.subscribe(orderId, dataDTO, json);
+            sseEmitterManager.subscribe(userId, dataDTO, json);
             
         } catch (Exception e) {
             // SSE 전송 실패는 데이터 저장 성공과는 별개이므로 로그만 남기고 넘어갑니다.

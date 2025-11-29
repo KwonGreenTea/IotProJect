@@ -14,13 +14,13 @@ public class NotificationController {
 	@Autowired
     private SseEmitterManager sseEmitterManager; 
 
-    @GetMapping("/alert/subscribe/{orderId}")
-    public SseEmitter errDataStream(@PathVariable String orderId) {
+    @GetMapping("/alert/subscribe/{userId}")
+    public SseEmitter errDataStream(@PathVariable String userId) {
     	
     	// 테스트 하드코딩
-		orderId = "0";
+    	userId = "test";
     	
-    	return sseEmitterManager.retreiveSubscribe(orderId);
+    	return sseEmitterManager.retreiveSubscribe(userId);
     }
     
     @GetMapping("/data/stream/{deviceId}")

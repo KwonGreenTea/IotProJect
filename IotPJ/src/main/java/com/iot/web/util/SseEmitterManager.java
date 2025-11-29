@@ -25,21 +25,17 @@ public class SseEmitterManager {
     private final Map<String, CopyOnWriteArrayList<SseEmitter>> dataEmitters = new ConcurrentHashMap<>();
     
      // --- 1. 알림용
-    public void subscribe(String orderId, SensorDataRealtimeDTO dataDTO, String json) {
+    public void subscribe(String userId, SensorDataRealtimeDTO dataDTO, String json) {
     	//log.info("SseEmitter subscribe - Parameter {} => " + dataDTO);
     	
     	// 상품 최대/최저 온도,습도 비교
-    	String resultCd = productService.retreiveProductDataYn(orderId, dataDTO);
+    	String resultCd = productService.retreiveProductDataYn(userId, dataDTO);
     	
     	log.info("resultCd = " + resultCd);
     	
     	// 비정상 데이터만 데이터 전송
     	if("Y".equals(resultCd)) {
-    		
-    		// 테스트 하드코딩
-    		orderId = "0";
-    		
-    		CopyOnWriteArrayList<SseEmitter> deviceEmitters = alertEmitters.get(orderId);
+    		CopyOnWriteArrayList<SseEmitter> deviceEmitters = alertEmitters.get(userId);
 
             if (deviceEmitters != null && !deviceEmitters.isEmpty()) {
 
@@ -90,14 +86,14 @@ public class SseEmitterManager {
     }
 
 
-    public SseEmitter retreiveSubscribe(String orderId) {
+    public SseEmitter retreiveSubscribe(String userId) {
 
         // 새로운 Emitter 생성 (타임아웃 무제한)
         SseEmitter emitter = new SseEmitter(0L);
 
         // 리스트 가져오기
         CopyOnWriteArrayList<SseEmitter> deviceEmitters =
-                alertEmitters.computeIfAbsent(orderId, k -> new CopyOnWriteArrayList<>());
+                alertEmitters.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>());
 
         // 리스트에 추가
         deviceEmitters.add(emitter);

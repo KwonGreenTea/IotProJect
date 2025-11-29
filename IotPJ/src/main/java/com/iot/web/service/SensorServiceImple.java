@@ -31,5 +31,10 @@ public class SensorServiceImple implements SensorService {
 	public String retrieveOrderIdByDeviceId(String deviceId) {
 		return sensorMapper.retrieveOrderIdByDeviceId(deviceId);
 	}
+
+	@Override
+	public String retrieveUserIdByDeviceId(String deviceId) {
+		return sensorMapper.retrieveUserIdByDeviceId(deviceId);
+	}
 	
 }
