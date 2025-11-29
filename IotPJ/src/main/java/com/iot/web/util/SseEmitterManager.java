@@ -25,11 +25,11 @@ public class SseEmitterManager {
     private final Map<String, CopyOnWriteArrayList<SseEmitter>> dataEmitters = new ConcurrentHashMap<>();
     
      // --- 1. 알림용
-    public void subscribe(String userId, SensorDataRealtimeDTO dataDTO, String json) {
+    public void subscribe(String orderId, String userId, SensorDataRealtimeDTO dataDTO, String json) {
     	//log.info("SseEmitter subscribe - Parameter {} => " + dataDTO);
     	
     	// 상품 최대/최저 온도,습도 비교
-    	String resultCd = productService.retreiveProductDataYn(userId, dataDTO);
+    	String resultCd = productService.retreiveProductDataYn(orderId, dataDTO);
     	
     	log.info("resultCd = " + resultCd);
     	

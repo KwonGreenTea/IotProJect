@@ -32,7 +32,7 @@
 		        END AS resultCd
 		    FROM PRODUCT_INFO A, ORDER_INFO B 
             WHERE A.PRODUCT_ID = B.PRODUCT_ID
-		      AND B.USER_ID = #{userId}
+		      AND B.ORDER_ID = #{orderId}
 	    ]]>
 	</select>
 
