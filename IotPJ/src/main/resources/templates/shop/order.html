@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 주문 내역 | MERRY SHOP</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 크리스마스 테마 변수 */
+        :root { 
+            --xmas-red: #D42426; 
+            --xmas-dark: #1A1A1A; 
+            --xmas-bg: #F8F9FA; 
+            --xmas-green: #198754;
+        }
+
+        body { 
+            background-color: var(--xmas-bg); 
+            color: var(--xmas-dark); 
+            font-family: 'Noto Sans KR', sans-serif;
+            padding-bottom: 80px; 
+        }
+
+        /* 네비게이션 */
+        .navbar-custom { background-color: var(--xmas-red); }
+        
+        /* 주문 카드 스타일 */
+        .order-card {
+            border: none;
+            border-radius: 12px;
+            background: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+            border-left: 5px solid transparent; /* 상태 표시줄용 */
+        }
+        
+        .order-card:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        /* 상태별 카드 스타일 (배송중일 때 왼쪽 빨간줄) */
+        .order-card.status-shipping { border-left-color: var(--xmas-red); }
+        .order-card.status-pending { border-left-color: #dee2e6; }
+
+        .price-text { color: var(--xmas-dark); font-weight: 800; font-size: 1.1rem; }
+        
+        /* 배지 스타일 */
+        .badge-shipping { 
+            background-color: #fff0f0; color: var(--xmas-red); border: 1px solid #ffc9c9; 
+            padding: 6px 12px; border-radius: 20px; font-weight: 600;
+        }
+        .badge-pending { 
+            background-color: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;
+            padding: 6px 12px; border-radius: 20px;
+        }
+
+        /* 모니터링 버튼 (핵심 기능 강조) */
+        .btn-monitor {
+            background-color: white;
+            border: 1px solid var(--xmas-red);
+            color: var(--xmas-red);
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-monitor:hover {
+            background-color: var(--xmas-red);
+            color: white;
+            box-shadow: 0 4px 10px rgba(212, 36, 38, 0.3);
+        }
+        
+        /* 애니메이션 (배송중 아이콘) */
+        .fa-truck-fast { animation: bounce 2s infinite; }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(3px); }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-custom sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand text-white fw-bold" href="/">
+                <i class="fa-solid fa-gift me-2"></i>MERRY SHOP
+            </a>
+            <div class="text-white small d-none d-md-block">
+                <i class="fa-regular fa-user me-1"></i>
+                <span th:text="${#lists.isEmpty(myOrderList) ? '고객' : myOrderList[0].userId}">User</span>님의 주문
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        
+        <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
+            <div>
+                <h3 class="fw-bold mb-1"><i class="fa-solid fa-list-check text-danger me-2"></i>주문 내역</h3>
+                <p class="text-muted small mb-0">주문하신 상품의 배송 상태와 실시간 온도를 확인하세요.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                
+                <div th:if="${#lists.isEmpty(myOrderList)}" class="text-center py-5 my-5">
+                    <div class="mb-3 text-muted opacity-50">
+                        <i class="fa-solid fa-sleigh fa-4x"></i>
+                    </div>
+                    <h5 class="fw-bold text-secondary">아직 주문 내역이 없습니다.</h5>
+                    <p class="text-muted">따뜻한 크리스마스 선물을 골라보세요!</p>
+                    <a href="/" class="btn btn-danger px-4 mt-3 rounded-pill">쇼핑하러 가기</a>
+                </div>
+
+                <div th:each="order : ${myOrderList}" 
+                     class="card order-card p-3"
+                     th:classappend="${order.isActive == 'Y'} ? 'status-shipping' : 'status-pending'">
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-muted small">
+                            <i class="fa-regular fa-calendar me-1"></i>
+                            <span th:text="${order.orderedAt}">2023-12-25</span>
+                        </div>
+                        
+                        <div th:if="${order.isActive == 'Y'}">
+                            <span class="badge badge-shipping">
+                                <i class="fa-solid fa-truck-fast me-1"></i>배송 중
+                            </span>
+                        </div>
+                        <div th:unless="${order.isActive == 'Y'}">
+                            <span class="badge badge-pending">상품 준비 중</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <img th:src="|https://placehold.co/100x100/f8f9fa/D42426?text=ITEM ${order.productId}|" 
+                                 class="rounded border" width="80" height="80" alt="상품이미지">
+                        </div>
+                        
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold mb-1">
+                                [상품 #<span th:text="${order.productId}"></span>]
+                                <span class="fw-normal fs-6">크리스마스 기획 상품</span>
+                            </h5>
+                            
+                            <div class="text-muted small mb-1">
+                                <i class="fa-solid fa-store me-1"></i>판매자: <span th:text="${order.sellerId}">Seller</span>
+                            </div>
+                            
+                            <div class="price-text">
+                                <span th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')}">30,000</span>원
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${order.isActive == 'Y'}" class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center bg-light rounded p-2">
+                        <div class="small text-secondary ps-2">
+                            <i class="fa-solid fa-box me-1"></i>운송장: <strong th:text="${order.deliveryId}"></strong>
+                        </div>
+                        <button class="btn btn-monitor btn-sm px-3 rounded-pill shadow-sm"
+                                th:onclick="|openUserMonitor(${order.orderId})|">
+                            <i class="fa-solid fa-temperature-half me-1"></i>실시간 온/습도 확인
+                        </button>
+                    </div>
+
+                    <div th:unless="${order.isActive == 'Y'}" class="mt-3 pt-2 border-top text-center text-muted small">
+                        <i class="fa-solid fa-gift me-1"></i>판매자가 상품을 꼼꼼하게 포장하고 있습니다.
+                    </div>
+
+                </div> </div>
+        </div>
+    </div>
+
+    <nav class="fixed-bottom bg-white border-top shadow-lg d-lg-none">
+        <div class="row text-center py-2 m-0">
+            <div class="col-4">
+                <a href="/" class="text-decoration-none text-dark small">
+                    <i class="fa-solid fa-house d-block fs-5 mb-1"></i>홈
+                </a>
+            </div>
+            <div class="col-4">
+                <a href="/order/list" class="text-decoration-none text-danger small fw-bold">
+                    <i class="fa-solid fa-list-check d-block fs-5 mb-1"></i>주문내역
+                </a>
+            </div>
+            <div class="col-4">
+                <a href="#" class="text-decoration-none text-dark small">
+                    <i class="fa-solid fa-cart-shopping d-block fs-5 mb-1"></i>장바구니
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 사용자용 모니터링 팝업 열기
+        function openUserMonitor(orderId) {
+            // 관리자와 동일한 모니터링 화면을 사용하거나, 
+            // 사용자 전용으로 권한이 제한된 화면을 사용할 수 있습니다.
+            // 여기서는 기존에 만든 화면을 재사용합니다.
+            const url = `/order/monitor/${orderId}`; 
+            
+            // 모바일 친화적인 팝업 크기 설정
+            const width = window.innerWidth < 768 ? window.innerWidth : 1000;
+            const height = window.innerHeight < 800 ? window.innerHeight : 800;
+            
+            window.open(url, '_blank', `width=${width},height=${height},scrollbars=yes`);
+        }
+    </script>
+</body>
+</html>
