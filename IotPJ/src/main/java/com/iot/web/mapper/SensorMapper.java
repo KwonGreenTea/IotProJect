@@ -13,6 +13,6 @@ public interface SensorMapper {
 
 	List<SensorDataRealtimeDTO> retrieveDataList(String deviceId);
 
-	String retrieveDeviceIdByOrderId(String orderId);
+	String retrieveOrderIdByDeviceId(String deviceId);
 	
 }

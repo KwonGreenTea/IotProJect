@@ -9,5 +9,5 @@ public interface SensorService {
 
 	List<SensorDataRealtimeDTO> retrieveDataList(String deviceId);
 
-	String retrieveDeviceIdByOrderId(String orderId);
+	String retrieveOrderIdByDeviceId(String deviceId);
 }

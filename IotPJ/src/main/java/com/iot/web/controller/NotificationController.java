@@ -14,12 +14,18 @@ public class NotificationController {
 	@Autowired
     private SseEmitterManager sseEmitterManager; 
 
-    @GetMapping("/data/stream/{orderId}")
-    public SseEmitter stream(@PathVariable String orderId) {
-    	// 알림
+    @GetMapping("/alert/subscribe/{orderId}")
+    public SseEmitter errDataStream(@PathVariable String orderId) {
     	
-        // SSE 연결 호출
-        return sseEmitterManager.subscribe(orderId);
+    	// 테스트 하드코딩
+		orderId = "0";
+    	
+    	return sseEmitterManager.retreiveSubscribe(orderId);
+    }
+    
+    @GetMapping("/data/stream/{deviceId}")
+    public SseEmitter dataStream(@PathVariable String deviceId) {
+        return sseEmitterManager.retreiveData(deviceId);
     }
     
 }

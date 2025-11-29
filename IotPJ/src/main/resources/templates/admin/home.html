@@ -195,6 +195,11 @@
             </div>
 
         </div> </main>
+		
+		<!-- 오른쪽 하단 Toast 영역 -->
+		<div id="toastContainer" 
+		     class="position-fixed bottom-0 end-0 p-3"
+		     style="z-index:9999;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -217,6 +222,82 @@
                 scales: { y: { beginAtZero: true } }
             }
         });
+		
+		
+		function showToast(orderId, errorCnt) {
+
+		    const toastContainer = document.getElementById("toastContainer");
+
+		    // 토스트 HTML 동적 생성
+		    const toastHtml = `
+		        <div class="toast text-bg-danger border-0 mb-2" role="alert"
+		             data-bs-autohide="true" data-bs-delay="5000"
+		             style="cursor:pointer;"
+		             onclick="location.href='/admin/orders/${orderId}'">
+		            <div class="d-flex">
+		                <div class="toast-body">
+		                    📢 주문번호 <b>${orderId}</b> 에서 오류 발생: <b>${errorCnt}건</b>
+		                </div>
+		                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+		                        data-bs-dismiss="toast"></button>
+		            </div>
+		        </div>
+		    `;
+
+		    // DOM에 추가
+		    toastContainer.insertAdjacentHTML("beforeend", toastHtml);
+
+		    // 가장 최근 추가된 토스트 선택 후 show
+		    const addedToast = toastContainer.lastElementChild;
+		    const toast = new bootstrap.Toast(addedToast);
+		    toast.show();
+		}
+		
+		function connectSensor() {
+			            const sseUrl = `/alert/subscribe/0`;
+			            console.log(`[AdminMonitor] [2] SSE 연결 시도: ${sseUrl}`);
+
+			            // SSE 연결
+			            eventSource = new EventSource(sseUrl);
+
+			            // [디버깅 3] 연결 성공 시
+			            eventSource.onopen = function() {
+			                console.log("[AdminMonitor] [3] SSE 연결 성공 (Connected)");
+			            };
+
+			            // [디버깅용] 이름 없는 이벤트 수신 확인 (혹시 백엔드에서 이름을 안 보냈을 경우 대비)
+			            eventSource.onmessage = function(event) {
+			                console.log("[AdminMonitor] [DEBUG] 이름 없는 메시지 수신:", event.data);
+			            };
+
+						eventSource.addEventListener("errorData", function(event) {
+
+						    const d = JSON.parse(event.data);
+
+						    // deviceId & errorCount만 추출
+						    const deviceId = d.deviceId;
+						    const cnt = d.errorCount ?? 1;  // 갯수 없으면 기본 1건
+
+							// 먼저 orderId 조회
+							    fetch(`/retrieve/orderId/${deviceId}`)
+							        .then(res => res.text())
+							        .then(orderId => {
+							            console.log("조회된 orderId:", orderId);
+
+							            // 조회 성공 후 토스트 띄우기
+							            showToast(orderId, cnt);
+							        })
+							        .catch(err => {
+							            console.error("orderId 조회 실패:", err);
+							        });
+						});
+
+			            eventSource.onerror = (err) => {
+			                console.error("[AdminMonitor] ❌ SSE 연결 끊김/에러:", err);
+			            };
+			        }
+					
+					connectSensor();
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

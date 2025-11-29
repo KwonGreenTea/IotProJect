@@ -51,13 +51,14 @@ public class SensorController {
         
         // 2. 데이터 파싱 및 DB 저장
         String deviceId = (String) jsonData.get("sensorCd");
-
+        String orderId = sensorService.retrieveOrderIdByDeviceId(deviceId);
+        
         SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
         dataDTO.setDeviceId(deviceId);
         dataDTO.setMeasuredAt(getSysDt());
         dataDTO.setTemperature(Double.parseDouble((String) jsonData.get("temperature")));
         dataDTO.setHumidity(Integer.parseInt((String) jsonData.get("humidity")));
-
+        
         sensorService.insertData(dataDTO);
         log.info("insertData() 완료" );
         
@@ -80,12 +81,15 @@ public class SensorController {
         String json = mapper.writeValueAsString(dataDTO);
 
         try {
-            // ▼▼▼ 예외 발생 지점 감싸기 ▼▼▼
             sseEmitterManager.sendData(deviceId, json);
+            
+            sseEmitterManager.subscribe(orderId, dataDTO, json);
             
         } catch (Exception e) {
             // SSE 전송 실패는 데이터 저장 성공과는 별개이므로 로그만 남기고 넘어갑니다.
             // 여기서 에러를 잡지 않으면 클라이언트(센서 기기)에게 500 에러가 날아갑니다.
+        	//e.printStackTrace();
+        	
             log.warn("SSE 실시간 알림 전송 실패 (저장은 완료됨): {}", e.getMessage());
         }
 
