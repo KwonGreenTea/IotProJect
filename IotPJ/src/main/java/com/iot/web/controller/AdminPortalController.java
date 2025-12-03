@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
 import com.iot.web.domain.ProductInfoDTO;
+import com.iot.web.domain.SensorDataRealtimeDTO;
 import com.iot.web.service.AdminService;
+import com.iot.web.service.SensorService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -26,8 +28,11 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AdminPortalController {
 
-	    @Autowired
-	    private AdminService adminService;
+	@Autowired
+	private AdminService adminService;
+	
+	@Autowired
+	private SensorService sensorService;
 
     /** 운영자 홈 */
     @GetMapping("/admin")
@@ -90,7 +95,21 @@ public class AdminPortalController {
 
         // orderId에 대한 주문 데이터 정보
         OrderInfoDTO orderInfoDTO = adminService.retrieveOrderDataForOrderId(orderId);
-        log.info("retrieveOrderDataForOrderId");
+        //log.info("retrieveOrderDataForOrderId");
+        
+        String deviceId = deviceInfoDTO.getDeviceId();
+    	
+    	// 센서 데이터 불러옴
+    	List<SensorDataRealtimeDTO> dataDTOList = sensorService.retrieveDataList(deviceId);
+    	SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
+    	 
+    	if (dataDTOList != null && !dataDTOList.isEmpty()) {
+            SensorDataRealtimeDTO firstData = dataDTOList.get(0);
+            dataDTO.setMaxTemperature(firstData.getMaxTemperature()); 
+            dataDTO.setMaxHumidity(firstData.getMaxHumidity());
+            dataDTO.setMinTemperature(firstData.getMinTemperature());
+            dataDTO.setMinHumidity(firstData.getMinHumidity());       
+        }
 
         log.info("deviceInfoDTO : {}", deviceInfoDTO);
         log.info("orderInfoDTO : {}", orderInfoDTO);
@@ -98,6 +117,8 @@ public class AdminPortalController {
         model.addAttribute("deviceInfoDTO", deviceInfoDTO);
         model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
         model.addAttribute("orderInfoDTO", orderInfoDTO);
+        model.addAttribute("dataDTO", dataDTO);
+        model.addAttribute("dataDTOList", dataDTOList);
 
         return "admin/orders/monitor";
     }

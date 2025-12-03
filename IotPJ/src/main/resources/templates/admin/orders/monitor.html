@@ -235,7 +235,10 @@
 	                        pointRadius: 3,
 	                        yAxisID: 'y',
 	                        tension: 0.3, 
-	                        fill: true
+	                        fill: true							,
+												
+							showLine: true,   
+							spanGaps: true
 	                    },
 	                    {
 	                        label: '습도 (%)',
@@ -246,7 +249,10 @@
 	                        pointRadius: 0,
 	                        borderDash: [5, 5],
 	                        yAxisID: 'y1',
-	                        tension: 0.3
+	                        tension: 0.3							,
+												
+							showLine: true,   
+							spanGaps: true
 	                    }
 	                ]
 	            },
@@ -431,11 +437,73 @@
 	                .catch(err => console.error("[AdminMonitor] 완료 처리 중 에러:", err));
 	            });
 	        }
-
-	        // 초기 실행
-	        connectSensor();
+			
+			connectSensor();
 
 	        /*]]>*/
 	    </script>
+		
+		<script th:inline="javascript">
+		  const dataList = /*[[${dataDTOList}]]*/ [];
+
+		  // sensorChart 초기화
+		  sensorChart.data.labels = [];
+		  sensorChart.data.datasets[0].data = []; // 온도
+		  sensorChart.data.datasets[1].data = []; // 습도
+
+		  if (Array.isArray(dataList) && dataList.length > 0) {
+
+		    dataList.forEach(d => {
+		      const temp = Number(d.temperature);
+		      const humid = Number(d.humidity);
+
+		      if (!Number.isFinite(temp) || !Number.isFinite(humid)) return;
+
+		      const label =
+		        (d.measuredAt ? (d.measuredAt.split(' ')[1] || d.measuredAt)
+		                      : (d.regDate || ''));
+
+		      if (!label) return;
+
+		      sensorChart.data.labels.push(label);
+		      sensorChart.data.datasets[0].data.push(temp);
+		      sensorChart.data.datasets[1].data.push(humid);
+		    });
+
+		    const start = Math.max(0, sensorChart.data.labels.length - 20);
+		    sensorChart.data.labels = sensorChart.data.labels.slice(start);
+		    sensorChart.data.datasets[0].data = sensorChart.data.datasets[0].data.slice(start);
+		    sensorChart.data.datasets[1].data = sensorChart.data.datasets[1].data.slice(start);
+
+		    const last = dataList[dataList.length - 1];
+		    const lastTemp = Number(last.temperature);
+		    const lastHumid = Number(last.humidity);
+
+		    if (Number.isFinite(lastTemp)) updateValue('currTemp', lastTemp.toFixed(1));
+		    if (Number.isFinite(lastHumid)) updateValue('currHumid', lastHumid);
+
+		    const lastLabel =
+		      (last.measuredAt ? (last.measuredAt.split(' ')[1] || last.measuredAt)
+		                       : (last.regDate || ''));
+		    if (lastLabel) updateText('lastUpdate', lastLabel);
+
+		    sensorChart.update();
+		  }
+		</script>
+		
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			const dataDTO = /*[[${dataDTO}]]*/ null;
+	
+			if (dataDTO) {
+			  if (dataDTO.minTemperature != null) updateText('tempMin', Number(dataDTO.minTemperature).toFixed(1));
+			  if (dataDTO.maxTemperature != null) updateText('tempMax', Number(dataDTO.maxTemperature).toFixed(1));
+	
+			  if (dataDTO.minHumidity != null) updateText('humidMin', dataDTO.minHumidity);
+			  if (dataDTO.maxHumidity != null) updateText('humidMax', dataDTO.maxHumidity);
+			}
+			/*]]>*/
+		</script>
+
 </body>
 </html>

@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
 import com.iot.web.domain.ProductInfoDTO;
+import com.iot.web.domain.SensorDataRealtimeDTO;
+import com.iot.web.service.SensorService;
 import com.iot.web.service.userBoardService;
 
 import lombok.extern.log4j.Log4j2;
@@ -28,6 +28,9 @@ public class UserBoardController {
 
 	@Autowired
 	private userBoardService userBoardService;
+	
+	@Autowired
+	private SensorService sensorService;
 
 	/*
 	 * @GetMapping({ "/", "/catalog" }) public String caltalog() {
@@ -158,8 +161,14 @@ public class UserBoardController {
         // 4. 모델에 담기
         // (배송 전이라 device가 없을 수도 있으므로 null 체크가 필요할 수 있음)
         if (deviceInfoDTO != null) {
+        	String deviceId = deviceInfoDTO.getDeviceId();
+        	
+        	// 센서 데이터 불러옴
+        	List<SensorDataRealtimeDTO> dataDTOList = sensorService.retrieveDataList(deviceId);
+        	
             model.addAttribute("deviceInfoDTO", deviceInfoDTO);
             model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
+            model.addAttribute("dataDTOList", dataDTOList);
         } else {
             // 아직 배송 시작 전이거나 센서가 없는 경우 처리
             model.addAttribute("deviceId", ""); 

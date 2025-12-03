@@ -199,7 +199,10 @@
                     pointBorderColor: '#0dcaf0',
                     pointRadius: 3,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+					
+					showLine: true,   
+					spanGaps: true
                 }]
             },
             options: {
@@ -316,5 +319,52 @@
         }
         /*]]>*/
     </script>
+	
+	<script th:inline="javascript">
+	  const dataList = /*[[${dataDTOList}]]*/ [];
+
+	  // 기존 데이터 있으면 비우고 다시 채움
+	  userChart.data.labels = [];
+	  userChart.data.datasets[0].data = [];
+
+	  if (Array.isArray(dataList) && dataList.length > 0) {
+
+	    dataList.forEach(d => {
+	      const temp = Number(d.temperature);
+	      if (!Number.isFinite(temp)) return;
+
+	      const label =
+	        (d.measuredAt ? (d.measuredAt.split(' ')[1] || d.measuredAt)
+	                      : (d.regDate || ''));
+
+	      if (!label) return;
+
+	      userChart.data.labels.push(label);
+	      userChart.data.datasets[0].data.push(temp);
+	    });
+
+	    // 최근 20개만 유지
+	    const start = Math.max(0, userChart.data.labels.length - 20);
+	    userChart.data.labels = userChart.data.labels.slice(start);
+	    userChart.data.datasets[0].data = userChart.data.datasets[0].data.slice(start);
+
+	    // 화면 값/테마는 “마지막 데이터” 기준으로 1번만 반영
+	    const last = dataList[dataList.length - 1];
+	    const lastTemp = Number(last.temperature);
+
+	    if (Number.isFinite(lastTemp)) {
+	      updateValue('currTemp', lastTemp.toFixed(1));
+	      updateValue('currHumid', last.humidity);
+	      updateStatusTheme(lastTemp);
+
+	      const lastLabel =
+	        (last.measuredAt ? (last.measuredAt.split(' ')[1] || last.measuredAt)
+	                         : (last.regDate || ''));
+	      if (lastLabel) document.getElementById('lastUpdate').innerText = lastLabel;
+	    }
+
+	    userChart.update();
+	  }
+	</script>
 </body>
 </html>
