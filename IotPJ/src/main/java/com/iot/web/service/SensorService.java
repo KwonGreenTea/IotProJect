@@ -12,4 +12,6 @@ public interface SensorService {
 	String retrieveOrderIdByDeviceId(String deviceId);
 	
 	String retrieveUserIdByDeviceId(String deviceId);
+
+	String retrieveDelivIdByOrderId(String orderId);
 }

@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iot.web.domain.AlarmLogDTO;
 import com.iot.web.domain.SensorDataRealtimeDTO;
+import com.iot.web.service.LogService;
 import com.iot.web.service.SensorService;
 import com.iot.web.util.SseEmitterManager;
 
@@ -27,6 +29,9 @@ public class SensorController {
 
     @Autowired
     private SensorService sensorService;
+    
+    @Autowired
+    private LogService logService;
 
     @Autowired
     private SseEmitterManager sseEmitterManager;
@@ -55,6 +60,17 @@ public class SensorController {
         String userId = sensorService.retrieveUserIdByDeviceId(deviceId);
         //log.info(orderId + " " + userId);
         
+        // 로그용 데이터 입력
+        String deliveryId = sensorService.retrieveDelivIdByOrderId(orderId);
+        
+        AlarmLogDTO logDTO = new AlarmLogDTO();
+        logDTO.setUserId(userId);
+        logDTO.setDeviceId(deviceId);
+        logDTO.setOrderId(Integer.parseInt(orderId));
+        logDTO.setDeliveryId(deliveryId);
+        logDTO.setLoggedAt(getSysDt());
+        logDTO.setLogCd("1"); // 1 : 센서 데이터 로그 INSERT
+        
         SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
         dataDTO.setDeviceId(deviceId);
         dataDTO.setMeasuredAt(getSysDt());
@@ -82,10 +98,21 @@ public class SensorController {
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(dataDTO);
 
+        // 로그 데이터
+        logDTO.setSensorData(json);
+        
         try {
             sseEmitterManager.sendData(deviceId, json);
             
-            sseEmitterManager.subscribe(orderId, userId, dataDTO, json);
+            sseEmitterManager.subscribe(orderId, userId, dataDTO, logDTO, json);
+            
+            // 로그 INSERT
+            try {
+            	logService.insertLog(logDTO);
+    		} catch (Exception e) {
+    			//e.printStackTrace();
+    			log.warn("OrderId = " + orderId + "의 대한 로그 데이터 INSERT 실패");
+    		}             
             
         } catch (Exception e) {
             // SSE 전송 실패는 데이터 저장 성공과는 별개이므로 로그만 남기고 넘어갑니다.

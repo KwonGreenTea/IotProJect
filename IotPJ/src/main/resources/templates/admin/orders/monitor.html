@@ -453,16 +453,21 @@
 
 		  if (Array.isArray(dataList) && dataList.length > 0) {
 
-		    dataList.forEach(d => {
+		    // ✅ (추가) 시간 오름차순 정렬: 과거 -> 현재
+		    const sorted = [...dataList].sort((a, b) => {
+		      const ta = a.measuredAt ? Date.parse(a.measuredAt.replace(' ', 'T')) : -Infinity;
+		      const tb = b.measuredAt ? Date.parse(b.measuredAt.replace(' ', 'T')) : -Infinity;
+		      return ta - tb;
+		    });
+
+		    sorted.forEach(d => {
 		      const temp = Number(d.temperature);
 		      const humid = Number(d.humidity);
-
 		      if (!Number.isFinite(temp) || !Number.isFinite(humid)) return;
 
 		      const label =
 		        (d.measuredAt ? (d.measuredAt.split(' ')[1] || d.measuredAt)
 		                      : (d.regDate || ''));
-
 		      if (!label) return;
 
 		      sensorChart.data.labels.push(label);
@@ -475,7 +480,8 @@
 		    sensorChart.data.datasets[0].data = sensorChart.data.datasets[0].data.slice(start);
 		    sensorChart.data.datasets[1].data = sensorChart.data.datasets[1].data.slice(start);
 
-		    const last = dataList[dataList.length - 1];
+		    // ✅ (수정) last도 정렬된 기준으로 잡기
+		    const last = sorted[sorted.length - 1];
 		    const lastTemp = Number(last.temperature);
 		    const lastHumid = Number(last.humidity);
 
@@ -490,6 +496,7 @@
 		    sensorChart.update();
 		  }
 		</script>
+
 		
 		<script th:inline="javascript">
 			/*<![CDATA[*/

@@ -16,5 +16,7 @@ public interface SensorMapper {
 	String retrieveOrderIdByDeviceId(String deviceId);
 	
 	String retrieveUserIdByDeviceId(String deviceId);
+
+	String retrieveDelivIdByOrderId(String orderId);
 	
 }

@@ -202,26 +202,35 @@
 		     style="z-index:9999;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	
+	<script th:inline="javascript">
+	  const weekLabels = /*[[${weekLabels}]]*/ [];
+	  const weekCounts = /*[[${weekCounts}]]*/ [];
+	</script>
+	
     <script>
         // 대시보드 차트 (Mock Data)
-        const ctx = document.getElementById('issueChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['월', '화', '수', '목', '금', '토', '일'],
-                datasets: [{
-                    label: '이상 온도 감지 건수',
-                    data: [2, 1, 5, 3, 2, 0, 1], // 실제로는 서버에서 받은 데이터 활용
-                    backgroundColor: '#D42426',
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
+		const ctx = document.getElementById('issueChart').getContext('2d');
+		new Chart(ctx, {
+		  type: 'bar',
+		  data: {
+		    labels: weekLabels,
+		    datasets: [{ data: weekCounts, backgroundColor:'#D42426', borderRadius:5 }]
+		  },
+		  options: {
+		    responsive: true,
+		    plugins: { legend: { display: false } },
+		    scales: {
+		      y: {
+		        beginAtZero: true,
+		        ticks: {
+		          stepSize: 1,         
+		          precision: 0          
+		        }
+		      }
+		    }
+		  }
+		});
 		
 		
 		function showToast(orderId, errorCnt) {

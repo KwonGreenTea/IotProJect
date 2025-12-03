@@ -2,7 +2,9 @@ package com.iot.web.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import com.iot.web.domain.OrderInfoDTO;
 import com.iot.web.domain.ProductInfoDTO;
 import com.iot.web.domain.SensorDataRealtimeDTO;
 import com.iot.web.service.AdminService;
+import com.iot.web.service.LogService;
 import com.iot.web.service.SensorService;
 
 import lombok.extern.log4j.Log4j2;
@@ -33,11 +36,28 @@ public class AdminPortalController {
 	
 	@Autowired
 	private SensorService sensorService;
-
+	
+	@Autowired
+    private LogService logService;
+	
     /** 운영자 홈 */
     @GetMapping("/admin")
-    public String adminHome() {
-        // templates/admin/home.html
+    public String adminHome(Model model) {
+        
+    	Map<String, Integer> filled = logService.retrieveErrData();
+    	
+    	List<String> labels = new ArrayList<>();
+        List<Integer> data  = new ArrayList<>();
+
+        for (var e : filled.entrySet()) {
+            labels.add(e.getKey());
+            data.add(e.getValue());
+        }
+
+        model.addAttribute("weekLabels", labels);
+        model.addAttribute("weekCounts", data);
+    	
+    	// templates/admin/home.html
         return "admin/home";
     }
 

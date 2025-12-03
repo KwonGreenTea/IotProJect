@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.iot.web.domain.AlarmLogDTO;
 import com.iot.web.domain.SensorDataRealtimeDTO;
 import com.iot.web.service.ProductService;
 
@@ -25,7 +26,7 @@ public class SseEmitterManager {
     private final Map<String, CopyOnWriteArrayList<SseEmitter>> dataEmitters = new ConcurrentHashMap<>();
     
      // --- 1. 알림용
-    public void subscribe(String orderId, String userId, SensorDataRealtimeDTO dataDTO, String json) {
+    public void subscribe(String orderId, String userId, SensorDataRealtimeDTO dataDTO, AlarmLogDTO logDTO, String json) {
     	//log.info("SseEmitter subscribe - Parameter {} => " + dataDTO);
     	
     	// 상품 최대/최저 온도,습도 비교
@@ -35,6 +36,8 @@ public class SseEmitterManager {
     	
     	// 비정상 데이터만 데이터 전송
     	if("Y".equals(resultCd)) {
+    		logDTO.setLogCd("2");
+    		
     		CopyOnWriteArrayList<SseEmitter> deviceEmitters = alertEmitters.get(userId);
 
             if (deviceEmitters != null && !deviceEmitters.isEmpty()) {

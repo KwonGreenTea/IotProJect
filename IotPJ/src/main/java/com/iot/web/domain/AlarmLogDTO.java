@@ -1,7 +1,5 @@
 package com.iot.web.domain;
 
-import java.time.LocalDateTime;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,12 +10,18 @@ import lombok.ToString;
 @Setter
 @ToString 
 public class AlarmLogDTO {
-    private Long logId;
-    private Long codeId;
+    private int logId;
     private String deliveryId;
-    private Long recordId;
+    private int orderId;
     private String deviceId;
-    private LocalDateTime loggedAt;
+    private String loggedAt;
     private String isChecked;
-    private String fieldValue;
+    private String adminChecked;
+    private String sensorData;
+    private String logCd; // 1 : 정상 로그 , 2 : 비 정상 로그, 3 :
+    private String userId;
+    
+    // 쿼리 결과
+    private String resultDay;
+    private Integer resultCnt;
 }

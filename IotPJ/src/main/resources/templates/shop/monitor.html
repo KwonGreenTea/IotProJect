@@ -329,14 +329,20 @@
 
 	  if (Array.isArray(dataList) && dataList.length > 0) {
 
-	    dataList.forEach(d => {
+	    // ✅ 시간 오름차순 정렬(과거 -> 현재)
+	    const sorted = [...dataList].sort((a, b) => {
+	      const ta = a.measuredAt ? Date.parse(a.measuredAt.replace(' ', 'T')) : -Infinity;
+	      const tb = b.measuredAt ? Date.parse(b.measuredAt.replace(' ', 'T')) : -Infinity;
+	      return ta - tb;
+	    });
+
+	    sorted.forEach(d => {
 	      const temp = Number(d.temperature);
 	      if (!Number.isFinite(temp)) return;
 
 	      const label =
 	        (d.measuredAt ? (d.measuredAt.split(' ')[1] || d.measuredAt)
 	                      : (d.regDate || ''));
-
 	      if (!label) return;
 
 	      userChart.data.labels.push(label);
@@ -348,8 +354,8 @@
 	    userChart.data.labels = userChart.data.labels.slice(start);
 	    userChart.data.datasets[0].data = userChart.data.datasets[0].data.slice(start);
 
-	    // 화면 값/테마는 “마지막 데이터” 기준으로 1번만 반영
-	    const last = dataList[dataList.length - 1];
+	    // ✅ last도 정렬된 기준으로
+	    const last = sorted[sorted.length - 1];
 	    const lastTemp = Number(last.temperature);
 
 	    if (Number.isFinite(lastTemp)) {
@@ -366,5 +372,6 @@
 	    userChart.update();
 	  }
 	</script>
+
 </body>
 </html>

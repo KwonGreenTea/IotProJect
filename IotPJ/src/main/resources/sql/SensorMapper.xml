@@ -83,6 +83,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		   AND A.DEVICE_ID = ${deviceId}
 	           FETCH FIRST 1 ROWS ONLY
 	</select>
+	
+	<select id="retrieveDelivIdByOrderId" resultType="java.lang.String">
+		SELECT A.DELIVERY_ID
+          FROM ORDER_INFO A
+		 WHERE A.ORDER_ID = ${orderId}
+	</select>
 
 </mapper>
 
