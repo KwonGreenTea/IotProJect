@@ -18,4 +18,5 @@ public class ProductInfoDTO {
     private Double maxTemperature;
     private Integer minHumidity;
     private Integer maxHumidity;
+    private String imageUrl;
 }
