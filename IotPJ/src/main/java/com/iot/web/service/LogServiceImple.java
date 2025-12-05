@@ -47,5 +47,10 @@ public class LogServiceImple implements LogService {
 	    return filled;
 	}
 
+	@Override
+	public List<AlarmLogDTO> retrieveAllDataForUserId(String userId) {
+		return logMapper.retrieveAllDataForUserId(userId);
+	}
+
 	
 }

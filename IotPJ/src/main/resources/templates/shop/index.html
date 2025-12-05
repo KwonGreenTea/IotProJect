@@ -76,6 +76,7 @@
             <div class="collapse navbar-collapse d-none d-lg-block" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="#">검색</a></li>
+					<li class="nav-item"><a class="nav-link" href="/order/notifications"><i class="fa-solid fa-bell me-1"></i>알림</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">주문 목록</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-cart-shopping me-1"></i>장바구니</a></li>
                     <li class="nav-item"><a class="nav-link btn btn-dark text-white ms-3 px-3 rounded-pill" href="#">로그아웃</a></li>
@@ -225,7 +226,7 @@
 				             onclick="location.href='/order/monitor/${orderId}'">
 				            <div class="d-flex">
 				                <div class="toast-body">
-				                    📢 주문번호 <b>${orderId}</b> 에서 오류 발생: <b>${errorCnt}건</b>
+				                    📢 주문번호 <b>${orderId}</b> 에서 이상 온/습도 발생 : <b>${errorCnt}건</b>
 				                </div>
 				                <button type="button" class="btn-close btn-close-white me-2 m-auto"
 				                        data-bs-dismiss="toast"></button>

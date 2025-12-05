@@ -1,5 +1,6 @@
 package com.iot.web.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.iot.web.domain.AlarmLogDTO;
 import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
 import com.iot.web.domain.ProductInfoDTO;
 import com.iot.web.domain.SensorDataRealtimeDTO;
+import com.iot.web.service.LogService;
 import com.iot.web.service.SensorService;
 import com.iot.web.service.userBoardService;
 
@@ -32,6 +35,9 @@ public class UserBoardController {
 	@Autowired
 	private SensorService sensorService;
 
+	@Autowired
+    private LogService logService;
+	
 	/*
 	 * @GetMapping({ "/", "/catalog" }) public String caltalog() {
 	 * 
@@ -181,7 +187,19 @@ public class UserBoardController {
         return "shop/monitor";
     }
     
-    
+    @GetMapping("/order/notifications")
+    public String userNotifications(Model model) {
+        // userId 하드코딩
+    	String userId = "test";
+    	
+    	// userId에 대한 알람 로그 불러오기
+    	List<AlarmLogDTO> notifyList = logService.retrieveAllDataForUserId(userId);
+    	
+    	model.addAttribute("notifyList", notifyList);
+    	
+    	// templates/shop/notifications.html
+        return "shop/notifications";
+    }
     
 }
     

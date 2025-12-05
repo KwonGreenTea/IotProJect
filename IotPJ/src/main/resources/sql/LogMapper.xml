@@ -58,5 +58,13 @@
       ORDER BY resultDay
     ]]>
     </select>
+    
+    <select id="retrieveAllDataForUserId" resultMap="logResultMap">
+	    SELECT *
+          FROM ALARM_LOG A
+         WHERE A.USER_ID  = #{userId}  
+           AND A.LOG_CODE = '2'
+      ORDER BY LOGGED_AT DESC
+    </select>
 
 </mapper>

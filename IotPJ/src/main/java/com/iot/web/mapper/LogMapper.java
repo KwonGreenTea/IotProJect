@@ -13,6 +13,8 @@ public interface LogMapper {
 	void insertLog(@Param("logDTO") AlarmLogDTO logDTO);
 
 	List<AlarmLogDTO> retrieveErrData(@Param("startDate") String startDate, @Param("endDate") String endDate);
+
+	List<AlarmLogDTO> retrieveAllDataForUserId(String userId);
 	
 	
 }
