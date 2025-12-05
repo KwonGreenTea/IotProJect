@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.iot.web.domain.AlarmLogDTO;
 import com.iot.web.domain.SensorDataRealtimeDTO;
+import com.iot.web.service.LogService;
 import com.iot.web.service.ProductService;
 
 import lombok.extern.log4j.Log4j2;
@@ -21,6 +22,9 @@ public class SseEmitterManager {
 	
 	@Autowired
     private ProductService productService;
+	
+	@Autowired
+    private LogService logService;
 
 	private final Map<String, CopyOnWriteArrayList<SseEmitter>> alertEmitters = new ConcurrentHashMap<>();
     private final Map<String, CopyOnWriteArrayList<SseEmitter>> dataEmitters = new ConcurrentHashMap<>();
@@ -37,6 +41,14 @@ public class SseEmitterManager {
     	// 비정상 데이터만 데이터 전송
     	if("Y".equals(resultCd)) {
     		logDTO.setLogCd("2");
+    		
+    		// 로그 INSERT
+            try {
+            	logService.insertLog(logDTO);
+    		} catch (Exception e) {
+    			//e.printStackTrace();
+    			log.warn("OrderId = " + orderId + "의 대한 로그 데이터 INSERT 실패");
+    		}     
     		
     		CopyOnWriteArrayList<SseEmitter> deviceEmitters = alertEmitters.get(userId);
 
