@@ -5,35 +5,53 @@
 
 <mapper namespace="com.iot.web.mapper.ProductMapper">
 
-    <resultMap type="com.iot.web.domain.ProductInfoDTO" id="deviceResultMap">
-        <id property="productId" column="PRODUCT_ID" />
-        <result property="sellerId" column="SELLER_ID" />
-        <result property="productName" column="PRODUCT_NAME" />
-        <result property="price" column="PRICE" />
-        <result property="minTemp" column="MIN_TEMPERATURE" />
-        <result property="maxTemp" column="MAX_TEMPERATURE" />
-        <result property="minHum" column="MIN_HUMIDITY" />
-        <result property="maxHum" column="MAX_HUMIDITY" />
+    <!-- 상품 기본 정보 매핑 -->
+    <resultMap id="productResultMap" type="com.iot.web.domain.ProductInfoDTO">
+        <id     property="productId"       column="PRODUCT_ID" />
+        <result property="sellerId"        column="SELLER_ID" />
+        <result property="productName"     column="PRODUCT_NAME" />
+        <result property="price"           column="PRICE" />
+        <result property="minTemperature"  column="MIN_TEMPERATURE" />
+        <result property="maxTemperature"  column="MAX_TEMPERATURE" />
+        <result property="minHumidity"     column="MIN_HUMIDITY" />
+        <result property="maxHumidity"     column="MAX_HUMIDITY" />
+        <result property="imageUrl"        column="IMAGE_URL" />   <!-- ★ 추가 -->
     </resultMap>
 
-    
+    <!-- (1) 상품 상세 조회용: 상세 페이지에서 productInfoById로 쓰기 -->
+    <select id="selectProductById" resultMap="productResultMap">
+        SELECT
+            PRODUCT_ID,
+            SELLER_ID,
+            PRODUCT_NAME,
+            PRICE,
+            MIN_TEMPERATURE,
+            MAX_TEMPERATURE,
+            MIN_HUMIDITY,
+            MAX_HUMIDITY,
+            IMAGE_URL
+        FROM PRODUCT_INFO
+        WHERE PRODUCT_ID = #{productId}
+    </select>
+
+    <!-- (2) 센서 데이터가 임계치를 넘었는지 여부 조회 -->
     <select id="retreiveProductDataYn" resultType="java.lang.String">
-	    <![CDATA[
-		    SELECT
-		        CASE
-		            WHEN (
-		                #{dataDTO.maxTemperature} > A.MAX_TEMPERATURE
-		                OR #{dataDTO.maxHumidity} > A.MAX_HUMIDITY
-		                OR #{dataDTO.minTemperature} < A.MIN_TEMPERATURE
-		                OR #{dataDTO.minHumidity} < A.MIN_HUMIDITY
-		            )
-		            THEN 'Y'
-		            ELSE 'N'
-		        END AS resultCd
-		    FROM PRODUCT_INFO A, ORDER_INFO B 
+        <![CDATA[
+            SELECT
+                CASE
+                    WHEN (
+                        #{dataDTO.maxTemperature} > A.MAX_TEMPERATURE
+                        OR #{dataDTO.maxHumidity} > A.MAX_HUMIDITY
+                        OR #{dataDTO.minTemperature} < A.MIN_TEMPERATURE
+                        OR #{dataDTO.minHumidity} < A.MIN_HUMIDITY
+                    )
+                    THEN 'Y'
+                    ELSE 'N'
+                END AS resultCd
+            FROM PRODUCT_INFO A, ORDER_INFO B 
             WHERE A.PRODUCT_ID = B.PRODUCT_ID
-		      AND B.ORDER_ID = #{orderId}
-	    ]]>
-	</select>
+              AND B.ORDER_ID = #{orderId}
+        ]]>
+    </select>
 
 </mapper>

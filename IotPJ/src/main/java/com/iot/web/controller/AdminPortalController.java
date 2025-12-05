@@ -6,16 +6,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+// 파일 저장용
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.iot.web.domain.DeviceInfoDTO;
 import com.iot.web.domain.OrderInfoDTO;
@@ -31,23 +39,23 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AdminPortalController {
 
-	@Autowired
-	private AdminService adminService;
-	
-	@Autowired
-	private SensorService sensorService;
-	
-	@Autowired
+    @Autowired
+    private AdminService adminService;
+
+    @Autowired
+    private SensorService sensorService;
+
+    @Autowired
     private LogService logService;
-	
+
     /** 운영자 홈 */
     @GetMapping("/admin")
     public String adminHome(Model model) {
-        
-    	Map<String, Integer> filled = logService.retrieveErrData();
-    	
-    	List<String> labels = new ArrayList<>();
-        List<Integer> data  = new ArrayList<>();
+
+        Map<String, Integer> filled = logService.retrieveErrData();
+
+        List<String> labels = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
 
         for (var e : filled.entrySet()) {
             labels.add(e.getKey());
@@ -56,8 +64,8 @@ public class AdminPortalController {
 
         model.addAttribute("weekLabels", labels);
         model.addAttribute("weekCounts", data);
-    	
-    	// templates/admin/home.html
+
+        // templates/admin/home.html
         return "admin/home";
     }
 
@@ -75,12 +83,10 @@ public class AdminPortalController {
         // templates/admin/orders/list.html
         return "admin/orders/list";
     }
-    
-    
- // 2. [API] 배송 시작 처리 (새로 추가)
-    // 경로: 
+
+    // 2. [API] 배송 시작 처리 (새로 추가)
     @PostMapping("/admin/orders/{orderId}/ship")
-    @ResponseBody // ★ 중요: 이게 있어야 HTML을 안 찾고 JSON/Text 데이터를 반환합니다.
+    @ResponseBody
     public ResponseEntity<String> startShipping(@PathVariable String orderId) {
         try {
             log.info("배송 시작 요청 받음: Order ID {}", orderId);
@@ -95,16 +101,13 @@ public class AdminPortalController {
                                  .body("오류 발생: " + e.getMessage());
         }
     }
-        
-      
-    
-    
+
     /** 운영자 주문 상세/모니터 */
     @GetMapping("/admin/orders/{orderId}")
     public String adminOrderMonitor(Model model, @PathVariable String orderId) {
         // 현재 활성화 되지 않은 센서(장비)에 orderId를 맵핑
         String startDate = getSysDt();
-        log.info("orderId : " + orderId); 
+        log.info("orderId : " + orderId);
         adminService.updateDeviceId(orderId, startDate);
         log.info("updateDeviceId 완료");
 
@@ -115,20 +118,19 @@ public class AdminPortalController {
 
         // orderId에 대한 주문 데이터 정보
         OrderInfoDTO orderInfoDTO = adminService.retrieveOrderDataForOrderId(orderId);
-        //log.info("retrieveOrderDataForOrderId");
-        
+
         String deviceId = deviceInfoDTO.getDeviceId();
-    	
-    	// 센서 데이터 불러옴
-    	List<SensorDataRealtimeDTO> dataDTOList = sensorService.retrieveDataList(deviceId);
-    	SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
-    	 
-    	if (dataDTOList != null && !dataDTOList.isEmpty()) {
+
+        // 센서 데이터 불러옴
+        List<SensorDataRealtimeDTO> dataDTOList = sensorService.retrieveDataList(deviceId);
+        SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
+
+        if (dataDTOList != null && !dataDTOList.isEmpty()) {
             SensorDataRealtimeDTO firstData = dataDTOList.get(0);
-            dataDTO.setMaxTemperature(firstData.getMaxTemperature()); 
+            dataDTO.setMaxTemperature(firstData.getMaxTemperature());
             dataDTO.setMaxHumidity(firstData.getMaxHumidity());
             dataDTO.setMinTemperature(firstData.getMinTemperature());
-            dataDTO.setMinHumidity(firstData.getMinHumidity());       
+            dataDTO.setMinHumidity(firstData.getMinHumidity());
         }
 
         log.info("deviceInfoDTO : {}", deviceInfoDTO);
@@ -157,13 +159,60 @@ public class AdminPortalController {
         return "admin/products/new";
     }
 
-    /** 운영자 상품 신규 등록 처리 (AJAX) */
-    @PostMapping("/admin/products")
+    /** 운영자 상품 신규 등록 처리 (AJAX, multipart + 이미지 업로드) */
+    @PostMapping(
+            value = "/admin/products",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     @ResponseBody
-    public String createProduct(@RequestBody ProductInfoDTO dto) {
+    public String createProduct(
+            @RequestParam String sellerId,
+            @RequestParam String productName,
+            @RequestParam Integer price,
+            @RequestParam(required = false) Double minTemperature,
+            @RequestParam(required = false) Double maxTemperature,
+            @RequestParam(required = false) Integer minHumidity,
+            @RequestParam(required = false) Integer maxHumidity,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile
+    ) {
         try {
+            // 1) 이미지 파일 저장
+            String imageUrl = null;
+
+            if (imageFile != null && !imageFile.isEmpty()) {
+                // TODO: 추후 설정 파일로 분리 가능
+                String uploadDir = "C:/uploads";
+
+                String originalName = imageFile.getOriginalFilename();
+                String ext = "";
+                if (originalName != null && originalName.lastIndexOf(".") != -1) {
+                    ext = originalName.substring(originalName.lastIndexOf("."));
+                }
+
+                String savedName = java.util.UUID.randomUUID().toString() + ext;
+
+                Path target = Paths.get(uploadDir, savedName);
+                Files.createDirectories(target.getParent());
+                Files.copy(imageFile.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+                // 브라우저에서 접근할 URL
+                imageUrl = "/uploads/" + savedName;
+            }
+
+            // 2) DTO 구성
+            ProductInfoDTO dto = new ProductInfoDTO();
+            dto.setSellerId(sellerId);
+            dto.setProductName(productName);
+            dto.setPrice(price);
+            dto.setMinTemperature(minTemperature);
+            dto.setMaxTemperature(maxTemperature);
+            dto.setMinHumidity(minHumidity);
+            dto.setMaxHumidity(maxHumidity);
+            dto.setImageUrl(imageUrl);
+
             log.info("상품 등록 요청: {}", dto);
             adminService.createProduct(dto);
+
             return "OK";
         } catch (Exception e) {
             log.error("상품 등록 중 오류", e);

@@ -23,7 +23,8 @@
 
   <!-- 등록 폼 카드 -->
   <section class="card">
-    <form id="productForm" class="form-grid">
+    <!-- ★ enctype 추가 -->
+    <form id="productForm" class="form-grid" enctype="multipart/form-data">
       <!-- 셀러 ID -->
       <div class="form-field">
         <label class="form-label">셀러 ID <span class="required">*</span></label>
@@ -107,6 +108,19 @@
             placeholder="최대"
           />
         </div>
+      </div>
+
+      <!-- ★ 상품 이미지 업로드 -->
+      <div class="form-field">
+        <label class="form-label">상품 이미지</label>
+        <input
+          type="file"
+          id="imageFile"
+          name="imageFile"
+          class="input"
+          accept="image/*"
+        />
+        <p class="field-help">jpg, png 등의 이미지를 업로드하세요.</p>
       </div>
 
       <!-- 메시지 영역 -->

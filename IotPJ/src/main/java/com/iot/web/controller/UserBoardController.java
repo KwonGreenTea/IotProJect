@@ -1,6 +1,5 @@
 package com.iot.web.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,82 +28,74 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class UserBoardController {
 
-	@Autowired
-	private userBoardService userBoardService;
-	
-	@Autowired
-	private SensorService sensorService;
+    @Autowired
+    private userBoardService userBoardService;
 
-	@Autowired
+    @Autowired
+    private SensorService sensorService;
+
+    @Autowired
     private LogService logService;
-	
-	/*
-	 * @GetMapping({ "/", "/catalog" }) public String caltalog() {
-	 * 
-	 * return "shop/index"; }
-	 */
-	
-	@GetMapping("/catalog/{productId}")
-	public String caltalogById() {
-		log.info("caltalogById");
-		
-		return "shop/detail";
-	}
-	
-	
 
-	@GetMapping({ "/" })
-	public String productList(Model model) {
+    /*
+     * @GetMapping({ "/", "/catalog" }) public String caltalog() {
+     *     return "shop/index";
+     * }
+     */
 
-		log.info("productList");
+    @GetMapping("/catalog/{productId}")
+    public String caltalogById() {
+        log.info("caltalogById");
+        return "shop/detail";
+    }
 
-		List<ProductInfoDTO> productList = userBoardService.selectProductList();
+    @GetMapping({ "/" })
+    public String productList(Model model) {
 
-		log.info("상품 리스트 : " + productList);
+        log.info("productList");
 
-		model.addAttribute("productList", productList);
-		
-		return "shop/index";
-	}
+        List<ProductInfoDTO> productList = userBoardService.selectProductList();
 
-	
-	
-	@GetMapping("/productList/{productId}")
-	public String selectProductById(@PathVariable Integer productId, Model model) {
-	    
-	    log.info("productList : ", productId);
-	  
-	    // 서비스에서 데이터 조회
-	    ProductInfoDTO productInfoById = userBoardService.selectProductById(productId);
-	  
-	    log.info("조회 상품 : " + productInfoById);
-	  
-	    // 타임리프로 데이터 전달 ("productInfoById" 라는 이름으로)
-	    model.addAttribute("productInfoById", productInfoById);
-	  
-	    // templates/shop/detail.html 로 이동
-	    return "shop/detail";
-	}
+        log.info("상품 리스트 : {}", productList);
 
-	 /** 장바구니 (파일 만들었을 때만 사용) */
+        model.addAttribute("productList", productList);
+
+        return "shop/index";
+    }
+
+    @GetMapping("/productList/{productId}")
+    public String selectProductById(@PathVariable Integer productId, Model model) {
+
+        log.info("productList : {}", productId);
+
+        // 서비스에서 데이터 조회
+        ProductInfoDTO productInfoById = userBoardService.selectProductById(productId);
+
+        log.info("조회 상품 : {}", productInfoById);
+
+        // 타임리프로 데이터 전달 ("productInfoById" 라는 이름으로)
+        model.addAttribute("productInfoById", productInfoById);
+
+        // templates/shop/detail.html 로 이동
+        return "shop/detail";
+    }
+
+    /** 장바구니 (파일 만들었을 때만 사용) */
     @GetMapping("/cart")
     public String cart() {
-    	
-    	log.info("cart()");
-        // templates/user/cart/cart.html
+
+        log.info("cart()");
+        // templates/cart/index.html
         return "cart/index";
     }
-    
-    
-    
-    
+
     @PostMapping("/orders/buy")
-    @ResponseBody 
+    @ResponseBody
     public ResponseEntity<String> buyProduct(@RequestBody OrderInfoDTO orderDto) {
         try {
             // 1. 서비스 호출 후 결과값(행 개수) 받기
             int result = userBoardService.createOrder(orderDto);
-            
+
             // 2. 결과 확인 (1 이상이면 성공)
             if (result > 0) {
                 log.info("주문 성공: DB Insert 완료");
@@ -113,40 +104,37 @@ public class UserBoardController {
                 // 결과가 0이면 DB에는 접근했으나 저장이 안 된 경우
                 log.warn("주문 실패: DB Insert 0건");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                     .body("주문 처리에 실패했습니다. (저장된 데이터 없음)");
+                        .body("주문 처리에 실패했습니다. (저장된 데이터 없음)");
             }
-  
+
         } catch (Exception e) {
             // SQL 에러 등 예외 발생 시
-            e.printStackTrace();
+            log.error("주문 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body("주문 실패: " + e.getMessage());
+                    .body("주문 실패: " + e.getMessage());
         }
     }
 
-    
     @GetMapping("/order/list")
     public String userOrderList(Model model) {
-        
-    	log.info("userOrderList()");
-        // 1. 서비스 호출
-        // (Service 내부에서 userId="test"로 고정해서 DB 조회를 수행합니다)
+
+        log.info("userOrderList()");
+        // 1. 서비스 호출 (Service 내부에서 userId="test"로 고정해서 DB 조회)
         List<OrderInfoDTO> myOrderList = userBoardService.selectOrderList();
-        
+
         // 2. 로그 확인 (개발 편의용)
-         log.info("조회된 주문 건수: " + myOrderList.size());
+        log.info("조회된 주문 건수: {}", myOrderList.size());
 
         // 3. 모델에 담기
-        // HTML에서 th:each="order : ${myOrderList}" 로 사용할 이름입니다.
         model.addAttribute("myOrderList", myOrderList);
-        
+
         // 4. 뷰 페이지로 이동 (templates/shop/order.html)
         return "shop/order";
     }
-    
-    
-    // 사용자 모니터링 부분 
-    /** * 사용자용 주문 상세 모니터링 페이지 
+
+    // 사용자 모니터링 부분
+    /**
+     * 사용자용 주문 상세 모니터링 페이지
      * 경로: GET /order/monitor/{orderId}
      */
     @GetMapping("/order/monitor/{orderId}")
@@ -156,7 +144,7 @@ public class UserBoardController {
         // 1. 센서(장비) 데이터 정보 조회
         // (주의: 사용자는 매핑 로직 updateDeviceId를 실행하지 않음! 조회만 수행)
         DeviceInfoDTO deviceInfoDTO = userBoardService.retrieveDeviceData(orderId);
-        
+
         // 2. 주문 상세 데이터 조회
         OrderInfoDTO orderInfoDTO = userBoardService.retrieveOrderDataForOrderId(orderId);
 
@@ -165,48 +153,39 @@ public class UserBoardController {
         log.info("orderInfoDTO : {}", orderInfoDTO);
 
         // 4. 모델에 담기
-        // (배송 전이라 device가 없을 수도 있으므로 null 체크가 필요할 수 있음)
         if (deviceInfoDTO != null) {
-        	String deviceId = deviceInfoDTO.getDeviceId();
-        	
-        	// 센서 데이터 불러옴
-        	List<SensorDataRealtimeDTO> dataDTOList = sensorService.retrieveDataList(deviceId);
-        	
+            String deviceId = deviceInfoDTO.getDeviceId();
+
+            // 센서 데이터 불러옴
+            List<SensorDataRealtimeDTO> dataDTOList = sensorService.retrieveDataList(deviceId);
+
             model.addAttribute("deviceInfoDTO", deviceInfoDTO);
             model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
             model.addAttribute("dataDTOList", dataDTOList);
         } else {
             // 아직 배송 시작 전이거나 센서가 없는 경우 처리
-            model.addAttribute("deviceId", ""); 
+            model.addAttribute("deviceId", "");
         }
-        
+
         model.addAttribute("orderInfoDTO", orderInfoDTO);
         model.addAttribute("orderId", orderId); // HTML에서 쓰기 위해 명시적으로 추가
 
-        // 아까 만든 사용자용 모니터링 화면 (templates/shop/monitor.html)
+        // 사용자용 모니터링 화면 (templates/shop/monitor.html)
         return "shop/monitor";
     }
-    
+
+    /** 사용자 알림 목록 페이지 */
     @GetMapping("/order/notifications")
     public String userNotifications(Model model) {
         // userId 하드코딩
-    	String userId = "test";
-    	
-    	// userId에 대한 알람 로그 불러오기
-    	List<AlarmLogDTO> notifyList = logService.retrieveAllDataForUserId(userId);
-    	
-    	model.addAttribute("notifyList", notifyList);
-    	
-    	// templates/shop/notifications.html
+        String userId = "test";
+
+        // userId에 대한 알람 로그 불러오기
+        List<AlarmLogDTO> notifyList = logService.retrieveAllDataForUserId(userId);
+
+        model.addAttribute("notifyList", notifyList);
+
+        // templates/shop/notifications.html
         return "shop/notifications";
     }
-    
 }
-    
-    
-    
-    
-    
-    
-
-

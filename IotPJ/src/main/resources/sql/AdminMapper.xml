@@ -87,28 +87,31 @@
          WHERE ORDER_ID = #{orderId}
     </select>
 
-    <!-- ✅ 상품 등록 INSERT (새로 추가된 부분) -->
-    <insert id="insertProduct">
-        INSERT INTO PRODUCT_INFO (
-            PRODUCT_ID
-          , SELLER_ID
-          , PRODUCT_NAME
-          , PRICE
-          , MIN_TEMPERATURE
-          , MAX_TEMPERATURE
-          , MIN_HUMIDITY
-          , MAX_HUMIDITY
-        )
-        VALUES (
-            PRODUCT_INFO_SEQ.NEXTVAL
-          , #{sellerId}
-          , #{productName}
-          , #{price}
-          , #{minTemperature}
-          , #{maxTemperature}
-          , #{minHumidity}
-          , #{maxHumidity}
-        )
-    </insert>
+	<!-- ✅ 상품 등록 INSERT (IMAGE_URL 추가 버전) -->
+	<insert id="insertProduct" parameterType="com.iot.web.domain.ProductInfoDTO">
+	    INSERT INTO PRODUCT_INFO (
+	        PRODUCT_ID
+	      , SELLER_ID
+	      , PRODUCT_NAME
+	      , PRICE
+	      , MIN_TEMPERATURE
+	      , MAX_TEMPERATURE
+	      , MIN_HUMIDITY
+	      , MAX_HUMIDITY
+	      , IMAGE_URL          <!-- ★ 추가 -->
+	    )
+	    VALUES (
+	        PRODUCT_INFO_SEQ.NEXTVAL
+	      , #{sellerId}
+	      , #{productName}
+	      , #{price}
+	      , #{minTemperature}
+	      , #{maxTemperature}
+	      , #{minHumidity}
+	      , #{maxHumidity}
+	      , #{imageUrl}        <!-- ★ 여기서 DTO의 imageUrl 값이 들어감 -->
+	    )
+	</insert>
+
 
 </mapper>

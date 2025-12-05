@@ -1,5 +1,3 @@
-// /src/main/resources/static/js/pages/adminProductNew.js
-
 window.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("#productForm");
   const msg = document.querySelector("#msg");
@@ -12,45 +10,33 @@ window.addEventListener("DOMContentLoaded", () => {
     msg.textContent = "";
     msg.className = "form-message";
 
+    // ★ 폼에서 FormData 그대로 사용 (이미지 포함)
     const formData = new FormData(form);
 
-    const dto = {
-      sellerId: formData.get("sellerId") || "SELLER01", // 셀러ID input 있으면 그대로, 없으면 기본값
-      productName: formData.get("productName"),
-      price: formData.get("price") ? Number(formData.get("price")) : null,
-      minTemperature: formData.get("minTemperature")
-        ? Number(formData.get("minTemperature"))
-        : null,
-      maxTemperature: formData.get("maxTemperature")
-        ? Number(formData.get("maxTemperature"))
-        : null,
-      minHumidity: formData.get("minHumidity")
-        ? Number(formData.get("minHumidity"))
-        : null,
-      maxHumidity: formData.get("maxHumidity")
-        ? Number(formData.get("maxHumidity"))
-        : null,
-    };
+    const productName = formData.get("productName");
+    const priceRaw = formData.get("price");
+    const sellerId = formData.get("sellerId") || "SELLER01";
 
     // 필수값 체크 (상품명/가격)
-    if (!dto.productName || dto.productName.trim().length === 0) {
+    if (!productName || productName.trim().length === 0) {
       msg.textContent = "상품명을 입력해주세요.";
       msg.classList.add("error");
       return;
     }
-    if (dto.price == null || isNaN(dto.price)) {
+    if (!priceRaw || isNaN(Number(priceRaw))) {
       msg.textContent = "가격을 올바르게 입력해주세요.";
       msg.classList.add("error");
       return;
     }
 
+    // 기본 셀러 ID 세팅 (input이 비어있으면 SELLER01로 대체)
+    formData.set("sellerId", sellerId);
+
     try {
       const res = await fetch("/admin/products", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json;charset=UTF-8",
-        },
-        body: JSON.stringify(dto),
+        // ★ headers 설정하지 말 것! (브라우저가 boundary 포함해서 자동으로 넣어줌)
+        body: formData,
       });
 
       const text = await res.text();

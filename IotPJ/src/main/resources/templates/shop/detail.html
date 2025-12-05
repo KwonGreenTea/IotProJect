@@ -45,8 +45,16 @@
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="product-img-container shadow-sm">
-                    <img th:src="|https://placehold.co/600x600/f8f9fa/D42426?text=${productInfoById.productName}|" 
-                         class="img-fluid w-100" 
+                    <!-- 1) 업로드한 이미지가 있을 때 -->
+                    <img th:if="${productInfoById.imageUrl != null}"
+                         th:src="${productInfoById.imageUrl}"
+                         class="img-fluid w-100"
+                         th:alt="${productInfoById.productName}">
+
+                    <!-- 2) 이미지가 없을 때: 기존 플레이스홀더 -->
+                    <img th:if="${productInfoById.imageUrl == null}"
+                         th:src="|https://placehold.co/600x600/f8f9fa/D42426?text=${productInfoById.productName}|"
+                         class="img-fluid w-100"
                          th:alt="${productInfoById.productName}">
                 </div>
             </div>
@@ -62,7 +70,9 @@
                     <span th:text="${#numbers.formatInteger(productInfoById.price, 0, 'COMMA')}">0</span>원
                 </h3>
 
-                <h5 class="fw-bold mb-3"><i class="fa-solid fa-circle-info text-secondary me-2"></i>상품 상세 스펙</h5>
+                <h5 class="fw-bold mb-3">
+                    <i class="fa-solid fa-circle-info text-secondary me-2"></i>상품 상세 스펙
+                </h5>
                 <div class="row g-2 mb-4">
                     <div class="col-6">
                         <div class="spec-box text-center">
@@ -185,7 +195,6 @@
             .then(response => {
                 if (response.ok) {
                     alert("구매가 완료되었습니다!");
-                    
                     location.href = '/order/list';
                 } else {
                     alert("구매 처리에 실패했습니다.");
