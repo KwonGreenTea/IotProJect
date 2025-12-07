@@ -153,7 +153,7 @@ public class AdminPortalController {
     }
 
     // 배송종료
-    @PostMapping("/admin/orders/${orderId}/complete")
+    @PostMapping("/admin/orders/{orderId}/complete")
     public ResponseEntity<String> adminProductEnd(@PathVariable String orderId) {
     	log.info("배송 종료 요청 받음: Order ID {}", orderId);
 

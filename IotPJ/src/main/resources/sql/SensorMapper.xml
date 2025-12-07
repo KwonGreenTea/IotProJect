@@ -101,6 +101,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
            < SYSDATE - NUMTODSINTERVAL(#{seconds}, 'SECOND')
     ]]>
 	</select>
+	
+	<update id="updateSersorData">
+		UPDATE SENSOR_DATA_REALTIME
+           SET DATA = ${data}
+		 WHERE A.DEVICE_ID = ${dataDTO.deviceId}
+      ORDER BY B.MEASURED_AT DESC
+	           FETCH FIRST 1 ROWS ONLY
+	</update>
 
 </mapper>
 

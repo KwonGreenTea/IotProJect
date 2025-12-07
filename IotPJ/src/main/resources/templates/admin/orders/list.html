@@ -141,20 +141,24 @@
                                 </td>
 
                                 <td class="text-center">
-                                    <span th:unless="${order.isActive == 'Y'}" class="badge bg-primary rounded-pill px-3">
-                                        신규 주문
-                                    </span>
                                     <span th:if="${order.isActive == 'Y'}" class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill px-3">
                                         배송 중
                                     </span>
+									<span th:if="${order.isActive == 'FN'}" class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill px-3">
+										배송 완료
+									</span>
                                 </td>
 
                                 <td class="text-center">
                                     
 									<button th:unless="${order.isActive == 'Y'}"
 									        class="btn btn-primary btn-sm shadow-sm fw-bold px-3"
-									        th:onclick="|startShipping(${order.orderId}, this)|">
-									    <i class="fa-solid fa-box-open me-1"></i> 배송 시작
+									        th:classappend="${order.isActive == 'FN'} ? ' disabled' : ''"
+									        th:disabled="${order.isActive == 'FN'}"
+									        th:onclick="${order.isActive != 'FN'} ? |startShipping(${order.orderId}, this)| : null">
+									        
+									    <i class="fa-solid fa-box-open me-1"></i>
+									    <span th:text="${order.isActive == 'FN'} ? '처리 완료' : '배송 시작'"></span>
 									</button>
 
                                     <button th:if="${order.isActive == 'Y'}"

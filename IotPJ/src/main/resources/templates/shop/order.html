@@ -43,9 +43,10 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
 
-        /* 상태별 카드 스타일 (배송중일 때 왼쪽 빨간줄) */
+        /* 상태별 카드 스타일 */
         .order-card.status-shipping { border-left-color: var(--xmas-red); }
         .order-card.status-pending { border-left-color: #dee2e6; }
+        .order-card.status-complete { border-left-color: var(--xmas-green); }
 
         .price-text { color: var(--xmas-dark); font-weight: 800; font-size: 1.1rem; }
         
@@ -118,7 +119,7 @@
 
                 <div th:each="order : ${myOrderList}" 
                      class="card order-card p-3"
-                     th:classappend="${order.isActive == 'Y'} ? 'status-shipping' : 'status-pending'">
+                     th:classappend="${order.isActive == 'Y'} ? ' status-shipping' : (${order.isActive == 'FN'} ? ' status-complete' : ' status-pending')">
                     
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="text-muted small">
@@ -126,12 +127,23 @@
                             <span th:text="${order.orderedAt}">2023-12-25</span>
                         </div>
                         
+                        <!-- 배송 상태 배지 -->
+                        <!-- 배송 중 -->
                         <div th:if="${order.isActive == 'Y'}">
                             <span class="badge badge-shipping">
                                 <i class="fa-solid fa-truck-fast me-1"></i>배송 중
                             </span>
                         </div>
-                        <div th:unless="${order.isActive == 'Y'}">
+
+                        <!-- 배송 완료 -->
+                        <div th:if="${order.isActive == 'FN'}">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1">
+                                <i class="fa-solid fa-check me-1"></i>배송 완료
+                            </span>
+                        </div>
+
+                        <!-- 상품 준비 중 -->
+                        <div th:if="${order.isActive != 'Y' and order.isActive != 'FN'}">
                             <span class="badge badge-pending">상품 준비 중</span>
                         </div>
                     </div>
@@ -158,21 +170,27 @@
                         </div>
                     </div>
 
-                    <div th:if="${order.isActive == 'Y'}" class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center bg-light rounded p-2">
+                    <!-- 배송 중 / 배송 완료일 때: 운송장 + 버튼 영역 -->
+                    <div th:if="${order.isActive == 'Y' or order.isActive == 'FN'}"
+                         class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center bg-light rounded p-2">
                         <div class="small text-secondary ps-2">
                             <i class="fa-solid fa-box me-1"></i>운송장: <strong th:text="${order.deliveryId}"></strong>
                         </div>
                         <button class="btn btn-monitor btn-sm px-3 rounded-pill shadow-sm"
                                 th:onclick="|openUserMonitor(${order.orderId})|">
-                            <i class="fa-solid fa-temperature-half me-1"></i>실시간 온/습도 확인
+                            <i class="fa-solid fa-temperature-half me-1"></i>
+                            <span th:text="${order.isActive == 'FN'} ? '배송 기록 확인' : '실시간 온/습도 확인'"></span>
                         </button>
                     </div>
 
-                    <div th:unless="${order.isActive == 'Y'}" class="mt-3 pt-2 border-top text-center text-muted small">
+                    <!-- 아직 배송 시작 전일 때: 안내 문구 -->
+                    <div th:if="${order.isActive != 'Y' and order.isActive != 'FN'}"
+                         class="mt-3 pt-2 border-top text-center text-muted small">
                         <i class="fa-solid fa-gift me-1"></i>판매자가 상품을 꼼꼼하게 포장하고 있습니다.
                     </div>
 
-                </div> </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -200,9 +218,6 @@
     <script>
         // 사용자용 모니터링 팝업 열기
         function openUserMonitor(orderId) {
-            // 관리자와 동일한 모니터링 화면을 사용하거나, 
-            // 사용자 전용으로 권한이 제한된 화면을 사용할 수 있습니다.
-            // 여기서는 기존에 만든 화면을 재사용합니다.
             const url = `/order/monitor/${orderId}`; 
             
             // 모바일 친화적인 팝업 크기 설정

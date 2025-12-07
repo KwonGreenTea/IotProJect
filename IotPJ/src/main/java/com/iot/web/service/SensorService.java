@@ -14,4 +14,6 @@ public interface SensorService {
 	String retrieveUserIdByDeviceId(String deviceId);
 
 	String retrieveDelivIdByOrderId(String orderId);
+
+	int updateSersorData(SensorDataRealtimeDTO dataDTO, String json);
 }

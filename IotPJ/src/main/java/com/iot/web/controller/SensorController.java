@@ -99,6 +99,8 @@ public class SensorController {
         // 로그 데이터
         logDTO.setSensorData(json);
         
+        sensorService.updateSersorData(dataDTO, json);
+        
         try {
             sseEmitterManager.sendData(deviceId, json);
             

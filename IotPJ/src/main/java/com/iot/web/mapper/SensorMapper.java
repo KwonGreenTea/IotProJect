@@ -21,5 +21,7 @@ public interface SensorMapper {
 	String retrieveDelivIdByOrderId(String orderId);
 
 	List<String> selectDevicesNoDataForSeconds(@Param("seconds") int seconds);
+
+	int updateSersorData(@Param("dataDTO") SensorDataRealtimeDTO dataDTO, @Param("data") String json);
 	
 }

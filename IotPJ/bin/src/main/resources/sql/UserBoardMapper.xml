@@ -5,7 +5,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 <mapper namespace="com.iot.web.mapper.UserBoardMapper">
 
-    <!-- DTO 매핑 -->
     <resultMap id="productResultMap" type="com.iot.web.domain.ProductInfoDTO">
         <id property="productId" column="PRODUCT_ID"/>
         <result property="sellerId" column="SELLER_ID"/>
@@ -15,21 +14,83 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="maxTemperature" column="MAX_TEMPERATURE"/>
         <result property="minHumidity" column="MIN_HUMIDITY"/>
         <result property="maxHumidity" column="MAX_HUMIDITY"/>
+        <result property="imageUrl" column="IMAGE_URL"/>
     </resultMap>
 
-   
-		  <!-- 1. 전체 상품 조회 -->
+    <resultMap id="orderResultMap" type="com.iot.web.domain.OrderInfoDTO">
+        <id property="orderId" column="ORDER_ID"/>
+        <result property="productId" column="PRODUCT_ID"/>
+        <result property="sellerId" column="SELLER_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="deliveryId" column="DELIVERY_ID"/>
+        <result property="orderedAt" column="ORDERED_AT"/>
+        <result property="totalPrice" column="TOTAL_PRICE"/>
+        <result property="isActive" column="IS_ACTIVE"/>
+    </resultMap>
+
+	<resultMap id="deviceResultMap" type="com.iot.web.domain.DeviceInfoDTO">
+        <id property="deviceId" column="DEVICE_ID" />
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="startDate" column="START_DATE" />
+        <result property="endDate" column="END_DATE" />
+        <result property="isActive" column="IS_ACTIVE" />
+        <result property="orderId" column="ORDER_ID" />
+    </resultMap>
+
+
     <select id="selectProductList" resultMap="productResultMap">
         SELECT *
         FROM PRODUCT_INFO
         ORDER BY PRODUCT_ID
     </select>
 
-    <!-- 2. PRODUCT_ID로 단일 상품 조회 -->
     <select id="selectProductById" parameterType="Integer" resultMap="productResultMap">
         SELECT *
         FROM PRODUCT_INFO
         WHERE PRODUCT_ID = #{productId}
     </select>
+
+    <insert id="createOrder" >
+        INSERT INTO ORDER_INFO (
+			ORDER_ID,
+            PRODUCT_ID,
+            SELLER_ID,
+            USER_ID,
+            DELIVERY_ID,
+            ORDERED_AT,
+            TOTAL_PRICE,
+            IS_ACTIVE
+        ) VALUES (
+			SEQ_ORDER_ID.NEXTVAL,
+            #{productId},
+            #{sellerId},
+            #{userId},
+            #{deliveryId},
+            #{orderedAt},
+            #{totalPrice},
+            #{isActive}  )
+    </insert>
+
+	<select id="selectOrderList" resultMap="orderResultMap">
+        SELECT * FROM ORDER_INFO
+        WHERE USER_ID = #{userId}
+        ORDER BY ORDER_ID DESC
+    </select>
+    
+    
+    <select id="retrieveDeviceData"  resultMap="deviceResultMap">
+        SELECT *
+        FROM DEVICE_INFO
+        WHERE ORDER_ID = #{orderId}
+          AND IS_ACTIVE = 'Y'  
+     </select>
+
+    <select id="retrieveOrderDataForOrderId" resultMap="orderResultMap">
+        SELECT *
+        FROM ORDER_INFO
+        WHERE ORDER_ID = #{orderId}
+    </select>
+
+
 
 </mapper>

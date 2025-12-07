@@ -8,10 +8,7 @@ import org.springframework.stereotype.Service;
 import com.iot.web.domain.SensorDataRealtimeDTO;
 import com.iot.web.mapper.SensorMapper;
 
-import lombok.extern.log4j.Log4j2;
-
 @Service
-@Log4j2
 public class SensorServiceImple implements SensorService {
 	
 	@Autowired
@@ -40,6 +37,11 @@ public class SensorServiceImple implements SensorService {
 	@Override
 	public String retrieveDelivIdByOrderId(String orderId) {
 		return sensorMapper.retrieveDelivIdByOrderId(orderId);
+	}
+
+	@Override
+	public int updateSersorData(SensorDataRealtimeDTO dataDTO, String json) {
+		return sensorMapper.updateSersorData(dataDTO, json);
 	}
 	
 }
