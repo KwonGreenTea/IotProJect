@@ -61,6 +61,11 @@ public class AdminServiceImple implements AdminService {
         adminMapper.insertProduct(dto);
     }
 
+	@Override
+	public String retreiveDeviceId(String orderId) {
+		return adminMapper.retreiveDeviceId(orderId);
+	}
+
 	
 	
 }

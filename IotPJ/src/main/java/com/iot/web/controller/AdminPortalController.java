@@ -92,6 +92,12 @@ public class AdminPortalController {
             log.info("배송 시작 요청 받음: Order ID {}", orderId);
 
             adminService.updateOrderIsActive(orderId);
+            
+            // 아두이노에 시작 데이터 수집 신호를 보냄
+            String deviceId = adminService.retreiveDeviceId(orderId); 
+            
+            SensorController tmp = new SensorController();
+            tmp.sensorActiveMap.put(deviceId, true);
 
             return ResponseEntity.ok("배송이 시작되었습니다."); // 200 OK
 
@@ -158,6 +164,12 @@ public class AdminPortalController {
     	log.info("배송 종료 요청 받음: Order ID {}", orderId);
 
         adminService.updateOrderIsActiveFn(orderId);
+        
+        // 아두이노에 시작 데이터 수집 신호를 보냄
+        String deviceId = adminService.retreiveDeviceId(orderId); 
+        
+        SensorController tmp = new SensorController();
+        tmp.sensorActiveMap.put(deviceId, false);
         
         return ResponseEntity.ok("배송이 종료 되었습니다.");
     }

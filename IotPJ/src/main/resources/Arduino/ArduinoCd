@@ -1,0 +1,91 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+const char* ssid     = "YOUR_SSID";
+const char* password = "YOUR_PASSWORD";
+
+// ✅ 이 보드의 deviceId
+String deviceId = "01";
+
+// ✅ 서버 URL (디바이스별)
+String baseUrl   = "http://146.56.111.104:9090";
+String postUrl   = baseUrl + "/api/data";
+String statusUrl = baseUrl + "/api/sensor/" + deviceId + "/status";
+
+float temperature = 0.0;
+float humidity    = 0.0;
+
+bool isActive = false;
+
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\n✅ WiFi Connected");
+}
+
+void loop() {
+  checkServerStatus();   // 서버가 이 기기를 켰는지/껐는지 확인
+
+  if (isActive) {
+    sendSensorData();    // ON일 때만 전송
+  } else {
+    Serial.println("⏸ STOP 상태 → 대기 중...");
+  }
+
+  delay(5000);
+}
+
+// ✅ 서버에서 이 deviceId의 active 상태 확인
+void checkServerStatus() {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+  http.begin(statusUrl); 
+
+  int resCode = http.GET();
+
+  if (resCode == 200) {
+    String response = http.getString();
+    Serial.println("📥 status 응답: " + response);
+
+    // 아주 단순 파싱 (active:true/false 포함 여부만 체크)
+    if (response.indexOf("true") > 0) {
+      isActive = true;
+    } else {
+      isActive = false;
+    }
+  } else {
+    Serial.print("❌ status 조회 실패: ");
+    Serial.println(resCode);
+  }
+
+  http.end();
+}
+
+// ✅ 실제 센서 데이터 전송
+void sendSensorData() {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+  http.begin(postUrl);
+  http.addHeader("Content-Type", "application/json");
+
+  String jsonData = "{";
+  jsonData += "\"deviceId\":\"" + deviceId + "\",";
+  jsonData += "\"temperature\":" + String(temperature, 1) + ",";
+  jsonData += "\"humidity\":" + String(humidity, 1);
+  jsonData += "}";
+
+  Serial.println("📤 전송: " + jsonData);
+
+  int resCode = http.POST(jsonData);
+  Serial.print("✅ 응답 코드: ");
+  Serial.println(resCode);
+
+  http.end();
+}

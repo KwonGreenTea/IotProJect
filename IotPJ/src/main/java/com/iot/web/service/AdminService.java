@@ -24,5 +24,7 @@ public interface AdminService {
     // 상품 등록 관련
     void createProduct(ProductInfoDTO dto);
 
+	String retreiveDeviceId(String orderId);
+
 	
 }

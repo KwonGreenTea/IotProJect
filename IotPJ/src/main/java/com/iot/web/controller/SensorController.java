@@ -2,12 +2,16 @@ package com.iot.web.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -27,9 +31,7 @@ import lombok.extern.log4j.Log4j2;
 public class SensorController {
 
     @Autowired
-    private SensorService sensorService;
-    
-    
+    private SensorService sensorService; 
 
     @Autowired
     private SseEmitterManager sseEmitterManager;
@@ -38,6 +40,19 @@ public class SensorController {
 
     private String getSysDt() {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+    
+    // 아두이노에서 센서 상태 관리
+    public final Map<String, Boolean> sensorActiveMap = new ConcurrentHashMap<>();
+    
+    @GetMapping("/api/sensor/{deviceId}/status")
+    public Map<String, Object> getSensorStatus(@PathVariable String deviceId) {
+        boolean active = sensorActiveMap.getOrDefault(deviceId, false);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("deviceId", deviceId);
+        result.put("active", active);
+        return result;
     }
 
     @PostMapping("/api/data")
@@ -53,7 +68,7 @@ public class SensorController {
         log.info("receiveDataPost");
         
         // 2. 데이터 파싱 및 DB 저장
-        String deviceId = (String) jsonData.get("sensorCd");
+        String deviceId = (String) jsonData.get("deviceId");
         String orderId = sensorService.retrieveOrderIdByDeviceId(deviceId);
         String userId = sensorService.retrieveUserIdByDeviceId(deviceId);
         //log.info(orderId + " " + userId);

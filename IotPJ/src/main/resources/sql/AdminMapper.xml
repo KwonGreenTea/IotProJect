@@ -120,5 +120,10 @@
 	    )
 	</insert>
 
-
+	<select id="retreiveDeviceId" resultMap="java.lang.String">
+        SELECT DEVICE_ID
+          FROM DEVICE_INFO
+         WHERE ORDER_ID = #{orderId}
+    </select>
+	
 </mapper>
