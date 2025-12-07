@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.iot.web.mapper.SensorMapper">
+
+	<resultMap type="com.iot.web.domain.SensorDataRealtimeDTO" id="SensorResultMap">
+   	 	<id property="recordId" column="RECORD_ID" />
+    	<result property="deviceId" column="DEVICE_ID" />
+    	<result property="measuredAt" column="MEASURED_AT" />
+    	<result property="temperature" column="TEMPERATURE" />
+    	<result property="humidity" column="HUMIDITY" />
+    
+    	<result property="maxTemperature" column="MAX_TEMP" />
+    	<result property="maxHumidity" column="MAX_HUMID" />
+    	<result property="minTemperature" column="MIN_TEMP" />
+    	<result property="minHumidity" column="MIN_HUMID" />	
+	</resultMap>
+
+	<insert id="insertData">
+		INSERT INTO SENSOR_DATA_REALTIME (
+			RECORD_ID
+		  , DEVICE_ID
+		  , MEASURED_AT
+		  , TEMPERATURE
+		  , HUMIDITY
+	    )
+		VALUES (
+			SENSOR_DATA_SEQ.NEXTVAL
+		  , #{deviceId}
+		  , #{measuredAt}
+		  , #{temperature}
+		  , #{humidity}
+	    )
+	</insert>
+
+	
+	<select id="retrieveDataList" resultMap="SensorResultMap">
+	    SELECT
+	        T.RECORD_ID,
+	        T.DEVICE_ID,
+	        T.MEASURED_AT,
+	        T.TEMPERATURE,
+	        T.HUMIDITY,
+	        MAX(T.TEMPERATURE) OVER() AS MAX_TEMP,
+	        MAX(T.HUMIDITY)    OVER() AS MAX_HUMID,
+	        MIN(T.TEMPERATURE) OVER() AS MIN_TEMP,
+	        MIN(T.HUMIDITY)    OVER() AS MIN_HUMID
+	    FROM 
+	        (
+	            -- [1단계] 먼저 최신 10개만 딱 잘라냄
+	            SELECT
+	                RECORD_ID,
+	                DEVICE_ID,
+	                MEASURED_AT,
+	                TEMPERATURE,
+	                HUMIDITY
+	            FROM
+	                SENSOR_DATA_REALTIME
+	            WHERE
+	                DEVICE_ID = #{deviceId}
+	            ORDER BY
+	                RECORD_ID DESC
+	            FETCH FIRST 10 ROWS ONLY
+	        ) T
+</select>
+	
+	
+	<select id="retrieveOrderIdByDeviceId" resultType="java.lang.String">
+		SELECT A.ORDER_ID
+          FROM DEVICE_INFO A, SENSOR_DATA_REALTIME B 
+		 WHERE A.DEVICE_ID = B.DEVICE_ID
+		   AND A.DEVICE_ID = ${deviceId}
+      ORDER BY B.MEASURED_AT DESC
+	           FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<select id="retrieveUserIdByDeviceId" resultType="java.lang.String">
+		SELECT B.USER_ID
+          FROM DEVICE_INFO A, ORDER_INFO B
+		 WHERE A.ORDER_ID = B.ORDER_ID
+		   AND A.DEVICE_ID = ${deviceId}
+	           FETCH FIRST 1 ROWS ONLY
+	</select>
+	
+	<select id="retrieveDelivIdByOrderId" resultType="java.lang.String">
+		SELECT A.DELIVERY_ID
+          FROM ORDER_INFO A
+		 WHERE A.ORDER_ID = ${orderId}
+	</select>
+	
+	<select id="selectDevicesNoDataForSeconds" resultType="java.lang.String">
+	<![CDATA[
+		SELECT A.DEVICE_ID
+          FROM SENSOR_DATA_REALTIME A, DEVICE_INFO B, ORDER_INFO C
+         WHERE A.DEVICE_ID = B.DEVICE_ID
+           AND B.ORDER_ID = C.ORDER_ID
+      GROUP BY A.DEVICE_ID
+        HAVING MAX(TO_DATE(A.MEASURED_AT, 'YYYY-MM-DD HH24:MI:SS'))
+           < SYSDATE - NUMTODSINTERVAL(#{seconds}, 'SECOND')
+    ]]>
+	</select>
+
+</mapper>
+
+
+

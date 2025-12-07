@@ -1,0 +1,50 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <title>관리자 | 상품 등록</title>
+  <link rel="stylesheet" href="/css/shop.css" />
+  <script>
+    async function onSubmit(e){
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const payload = {
+        name: form.get("name"),
+        price: Number(form.get("price")||0),
+        thresholdTemp: Number(form.get("thresholdTemp")||0),
+        thresholdHumid: Number(form.get("thresholdHumid")||0),
+        description: form.get("description") || ""
+      };
+      const res = await fetch("/mock/products", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(payload)
+      });
+      if(res.ok){
+        alert("등록되었습니다(목업).");
+        location.href = "/admin/products";
+      }else{
+        alert("등록 실패");
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>상품 등록</h1>
+      <a class="btn secondary" href="/admin/products">목록</a>
+    </div>
+    <form onsubmit="onSubmit(event)" class="card" style="max-width:720px;">
+      <label>상품명<br><input name="name" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"></label><br><br>
+      <label>가격(원)<br><input name="price" type="number" min="0" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"></label><br><br>
+      <div style="display:grid;grid-template-columns:1fr 1fr; gap:12px;">
+        <label>임계 온도(℃)<br><input name="thresholdTemp" type="number" step="0.1" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"></label>
+        <label>임계 습도(%)<br><input name="thresholdHumid" type="number" step="0.1" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"></label>
+      </div><br>
+      <label>설명<br><textarea name="description" rows="4" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"></textarea></label><br>
+      <button class="btn" type="submit">등록</button>
+    </form>
+  </div>
+</body>
+</html>

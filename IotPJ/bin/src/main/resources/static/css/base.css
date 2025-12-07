@@ -1,0 +1,672 @@
+:root { --bg:#0b0c10; --card:#15171c; --txt:#e8e8ea; --muted:#a9a9b2; --brand:#69e1ff; }
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,Apple SD Gothic Neo,Pretendard,sans-serif;background:var(--bg);color:var(--txt)}
+a{color:inherit}
+.container{max-width:1000px;margin:24px auto;padding:0 16px}
+.card{background:var(--card);border:1px solid #23262e;border-radius:14px;padding:16px;margin:12px 0}
+.h1{font-size:24px;font-weight:700;margin:6px 0 12px}
+.h2{font-size:18px;font-weight:700;margin:0 0 10px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.right{margin-left:auto}
+.btn{border:1px solid #2e313a;background:#1b1e26;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
+.btn.primary{border-color:#3b97b1;background:#175464}
+.btn.ghost{background:transparent}
+.badge{display:inline-block;padding:3px 8px;border:1px solid #2e313a;border-radius:999px;color:var(--muted);font-size:12px}
+.small{font-size:12px;color:var(--muted)}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:10px;border-bottom:1px solid #262933;text-align:left}
+.list a{display:block;padding:12px 10px;border:1px solid #262933;border-radius:12px;text-decoration:none;color:var(--txt)}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 12px}
+.kv .v{font-weight:600}
+.sensor{display:flex;gap:12px;align-items:center}
+.sensor .chip{border:1px solid #2b2f38;border-radius:10px;padding:8px 10px}
+.toast{position:fixed;right:16px;bottom:16px;background:#1b1e26;border:1px solid #2e313a;border-radius:10px;padding:12px 14px}
+/* ===== 기본 레이아웃 ===== */
+.app-body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #05060a;
+  color: #f6f6f7;
+}
+
+.app-shell {
+  max-width: 1080px;
+  margin: 24px auto 40px;
+  padding: 0 16px;
+}
+
+/* ===== 페이지 헤더 ===== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.page-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #9a9cab;
+}
+
+/* ===== 카드 공통 ===== */
+.card {
+  background: radial-gradient(circle at top left, #161925, #080910);
+  border-radius: 16px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  margin-bottom: 16px;
+}
+
+.card--filter {
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.card-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #8a8ca0;
+}
+
+/* ===== 필터 바 ===== */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+}
+
+.filter-group--grow {
+  flex: 1;
+}
+
+.filter-label {
+  font-size: 11px;
+  color: #9a9cab;
+}
+
+/* ===== 입력/셀렉트 ===== */
+.select,
+.input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #2e313a;
+  background: #0f1116;
+  color: #e8e8ea;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.select:focus,
+.input:focus {
+  border-color: #4b8bff;
+  box-shadow: 0 0 0 1px rgba(75, 139, 255, 0.5);
+  background: #11141c;
+}
+
+.select {
+  appearance: none;
+}
+
+/* 검색 아이콘 있는 입력 */
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon .input {
+  padding-left: 30px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ===== 버튼 스타일 ===== */
+.btn {
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 999px;
+  padding: 8px 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4b8bff, #6b5bff);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(75, 139, 255, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(75, 139, 255, 0.5);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(75, 139, 255, 0.35);
+}
+
+/* ===== 테이블 스타일 ===== */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.table th,
+.table td {
+  padding: 9px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  font-weight: 500;
+  color: #a0a2b4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background 0.12s ease, transform 0.05s ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+  transform: translateY(-1px);
+}
+
+.table td {
+  color: #e3e3ec;
+}
+
+.th-actions {
+  text-align: right;
+}
+
+/* 상태 뱃지 예시 (나중에 JS로 class 붙여서 사용 가능) */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.badge--pending {
+  background: rgba(251, 188, 4, 0.1);
+  color: #fbbc04;
+}
+
+.badge--shipping {
+  background: rgba(75, 139, 255, 0.1);
+  color: #4b8bff;
+}
+
+.badge--done {
+  background: rgba(52, 168, 83, 0.12);
+  color: #34a853;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 640px) {
+  .app-shell {
+    margin-top: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card {
+    padding: 14px 12px;
+  }
+
+  .table th,
+  .table td {
+    padding: 7px 8px;
+  }
+}
+/* ===== 헤더 변형: 뒤로가기 버튼 포함 ===== */
+.page-header--with-back {
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-back {
+  padding-inline: 14px;
+  font-size: 12px;
+}
+
+/* ===== 버튼 변형 스타일 ===== */
+.btn-ghost {
+  background: transparent;
+  color: #c4c5d5;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: none;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-soft {
+  background: rgba(255, 255, 255, 0.04);
+  color: #e4e5f3;
+  box-shadow: none;
+}
+
+.btn-soft:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ===== 카드 변형: summary 용 ===== */
+.card--summary {
+  margin-bottom: 16px;
+}
+
+/* ===== 카드 헤더 variant ===== */
+.card-header--between {
+  align-items: center;
+}
+
+/* ===== 센서 패널 ===== */
+.sensor-panel {
+  margin-top: 8px;
+  padding: 14px 12px;
+  border-radius: 12px;
+  background: radial-gradient(circle at top left, #181c28, #0a0c14);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.sensor-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sensor-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.sensor-label {
+  font-size: 11px;
+  color: #9a9cab;
+}
+
+.sensor-value {
+  font-size: 12px;
+  color: #e3e3ec;
+}
+
+/* ===== 칩 / 배지 스타일 (온도/습도) ===== */
+.chip {
+  min-width: 120px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chip-label {
+  font-size: 11px;
+  color: #b2b3c3;
+}
+
+.chip-value {
+  font-weight: 600;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.chip-unit {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* 온도/습도별 색상 */
+.chip--temp {
+  background: radial-gradient(circle at top left, rgba(255, 138, 101, 0.2), rgba(15, 14, 22, 0.8));
+  border-color: rgba(255, 138, 101, 0.5);
+}
+
+.chip--humid {
+  background: radial-gradient(circle at top left, rgba(66, 165, 245, 0.22), rgba(15, 14, 22, 0.8));
+  border-color: rgba(66, 165, 245, 0.5);
+}
+
+/* ===== 센서 팁 메시지 ===== */
+.sensor-tip {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #a7a9bd;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+/* 반응형 조정 */
+@media (max-width: 640px) {
+  .sensor-panel {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sensor-meta {
+    min-width: 0;
+  }
+}
+/* ===== 관리자 홈: 카드 그리드 ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.card-tile {
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  background: radial-gradient(circle at top left, #191b27, #090a10);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 120px;
+}
+
+.card-tile-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-tile-desc {
+  margin: 0;
+  font-size: 12px;
+  color: #a0a2b4;
+  flex: 1;
+}
+
+.card-tile-link {
+  align-self: flex-start;
+  margin-top: 2px;
+  font-size: 12px;
+  padding-inline: 14px;
+}
+
+/* 모바일에서 1열 */
+@media (max-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== 필터 그리드 (주문 관리 전용 레이아웃) ===== */
+.filter-bar--grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.filter-group--buttons {
+  align-self: flex-end;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 모바일에서 필터 2열 또는 1열로 정리 */
+@media (max-width: 880px) {
+  .filter-bar--grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .filter-bar--grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== 모노스페이스 텍스트 (주문번호/이메일) ===== */
+.mono,
+small.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  color: #9fa2b8;
+}
+
+/* ===== 액션 셀 ===== */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-xs {
+  padding: 5px 10px;
+  font-size: 11px;
+}
+
+/* ===== 페이지네이션 ===== */
+.pager {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pager--center {
+  justify-content: center;
+}
+
+.pill {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #cccfe0;
+  background: rgba(10, 11, 18, 0.8);
+  transition: background 0.12s ease, transform 0.08s ease, border-color 0.12s ease;
+}
+
+.pill:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.pill.active {
+  background: linear-gradient(135deg, #4b8bff, #6b5bff);
+  border-color: transparent;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+/* ===== 폼 카드 공통 ===== */
+.form-card {
+  max-width: 760px;
+  margin: 0 auto 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 12px;
+  color: #c3c5d4;
+}
+
+.form-required {
+  color: #ff6b81;
+  margin-left: 4px;
+  font-size: 11px;
+}
+
+/* 텍스트area 변형 */
+.input--textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* 필드셋 / 레전드 */
+.form-fieldset {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 12px 12px;
+  margin: 0;
+}
+
+.form-legend {
+  padding: 0 6px;
+  font-size: 12px;
+  color: #aeb2c6;
+}
+
+/* 2열 그리드 */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+/* 액션 영역 */
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.form-message {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+/* 반응형 */
+@media (max-width: 560px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 페이지 헤더 액션 버튼 묶음 */
+.page-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 빈 상태 표시 (상품 없음 등) */
+.empty-state {
+  padding: 18px 10px;
+  text-align: center;
+  color: #c0c2d4;
+  font-size: 13px;
+}
+
+.empty-title {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.empty-desc {
+  margin: 0;
+  font-size: 12px;
+  color: #9598ad;
+}
+
+/* 인라인 링크 (테이블 안) */
+.link-inline {
+  font-size: 12px;
+  color: #4b8bff;
+  text-decoration: none;
+}
+
+.link-inline:hover {
+  text-decoration: underline;
+}

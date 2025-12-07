@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 모니터링 | Fresh Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #F5F7FB; font-family: 'Noto Sans KR', sans-serif; }
+        .monitor-container { max-width: 1400px; margin: 0 auto; padding: 30px; }
+        
+        /* 카드 디자인 */
+        .card-custom {
+            border: none; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: white; margin-bottom: 20px;
+        }
+        
+        /* 현재 값 표시 박스 */
+        .stat-box { padding: 25px; text-align: center; height: 100%; border-radius: 12px; }
+        .stat-title { color: #6c757d; font-size: 0.95rem; margin-bottom: 10px; font-weight: 500; }
+        .stat-value { font-size: 3rem; font-weight: 800; line-height: 1.2; }
+        
+        /* 그래프 영역 */
+        .chart-wrapper { position: relative; height: 400px; width: 100%; }
+
+        /* 애니메이션 (값 변경 시 깜빡임) */
+        .flash { animation: flash-animation 0.8s; }
+        @keyframes flash-animation { 
+            0% { opacity: 0.5; transform: scale(0.98); } 
+            100% { opacity: 1; transform: scale(1); } 
+        }
+    </style>
+</head>
+<body>
+	<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050; margin-top: 60px;">
+	        <button class="btn btn-light shadow-sm border" type="button" data-bs-toggle="offcanvas" data-bs-target="#infoSidebar">
+	            <i class="fa-solid fa-list-ul me-2"></i>로그 & 정보
+	        </button>
+	    </div>
+
+	    <div class="offcanvas offcanvas-end" tabindex="-1" id="infoSidebar" style="width: 400px;">
+	        <div class="offcanvas-header bg-light">
+	            <h5 class="offcanvas-title fw-bold"><i class="fa-solid fa-circle-info me-2"></i>배송 상세 정보</h5>
+	            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+	        </div>
+	        <div class="offcanvas-body">
+	            
+	            <div class="mb-4">
+	                <h6 class="fw-bold text-secondary border-bottom pb-2">📡 센서 기기 상태</h6>
+	                <div class="d-flex justify-content-between mt-2">
+	                    <span>배터리 잔량</span>
+	                    <span class="text-success fw-bold"><i class="fa-solid fa-battery-full me-1"></i>85%</span>
+	                </div>
+	                <div class="d-flex justify-content-between mt-1">
+	                    <span>신호 강도</span>
+	                    <span class="text-primary fw-bold"><i class="fa-solid fa-signal me-1"></i>우수 (-65dBm)</span>
+	                </div>
+	            </div>
+
+	            <div class="mb-4">
+	                <h6 class="fw-bold text-secondary border-bottom pb-2">📞 연락처 정보</h6>
+	                <div class="card bg-light border-0 mb-2">
+	                    <div class="card-body p-2">
+	                        <small class="text-muted d-block">배송 기사</small>
+	                        <div class="d-flex justify-content-between align-items-center">
+	                            <strong>김철수 기사님</strong>
+	                            <a href="tel:010-1234-5678" class="btn btn-sm btn-success"><i class="fa-solid fa-phone"></i></a>
+	                        </div>
+	                    </div>
+	                </div>
+	                <div class="card bg-light border-0">
+	                    <div class="card-body p-2">
+	                        <small class="text-muted d-block">구매자</small>
+	                        <div class="d-flex justify-content-between align-items-center">
+	                            <strong>이영희 고객님</strong>
+	                            <a href="tel:010-9876-5432" class="btn btn-sm btn-outline-dark"><i class="fa-solid fa-phone"></i></a>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+
+	            <div class="mb-4">
+	                <h6 class="fw-bold text-secondary border-bottom pb-2">🚨 알림/이벤트 로그</h6>
+	                <ul class="list-group list-group-flush small" id="eventLogList">
+	                    <li class="list-group-item d-flex justify-content-between px-0">
+	                        <span><span class="badge bg-danger me-2">경고</span>온도 이탈 (12.5°C)</span>
+	                        <span class="text-muted">14:32:05</span>
+	                    </li>
+	                    <li class="list-group-item d-flex justify-content-between px-0">
+	                        <span><span class="badge bg-success me-2">정상</span>온도 회복 (5.0°C)</span>
+	                        <span class="text-muted">14:35:10</span>
+	                    </li>
+	                    <li class="list-group-item d-flex justify-content-between px-0">
+	                        <span><span class="badge bg-secondary me-2">정보</span>배송 시작 처리</span>
+	                        <span class="text-muted">14:00:00</span>
+	                    </li>
+	                </ul>
+	            </div>
+
+	            <div class="d-grid">
+	                <button class="btn btn-outline-dark">
+	                    <i class="fa-solid fa-file-excel me-2"></i>온/습도 이력 엑셀 다운로드
+	                </button>
+	            </div>
+
+	        </div>
+	    </div>
+
+    <div class="monitor-container">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark"><i class="fa-solid fa-satellite-dish me-2 text-danger"></i>실시간 배송 관제</h2>
+                <p class="text-muted mb-0">주문번호 <strong class="text-dark" th:text="|#${orderId}|">#0</strong>의 센서 데이터를 수신 중입니다.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button onclick="window.close()" class="btn btn-outline-secondary px-4">닫기</button>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="card-custom h-100 p-0 overflow-hidden">
+                    <div class="stat-box bg-white">
+                        <div class="stat-title"><i class="fa-solid fa-temperature-half me-1"></i>현재 온도</div>
+                        <div class="stat-value text-danger">
+                            <span id="currTemp">--</span><span class="fs-4 text-muted fw-normal ms-1">°C</span>
+                        </div>
+                    </div>
+                    <div class="bg-light p-2 text-center border-top">
+                        <small class="text-muted">적정 온도: 0 ~ 10°C</small> </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="card-custom h-100 p-0 overflow-hidden">
+                    <div class="stat-box bg-white">
+                        <div class="stat-title"><i class="fa-solid fa-droplet me-1"></i>현재 습도</div>
+                        <div class="stat-value text-primary">
+                            <span id="currHumid">--</span><span class="fs-4 text-muted fw-normal ms-1">%</span>
+                        </div>
+                    </div>
+                    <div class="bg-light p-2 text-center border-top">
+                        <small class="text-muted">적정 습도: 40 ~ 60%</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="card-custom h-100 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0">📈 데이터 통계 (누적 범위)</h5>
+                        <span class="badge bg-success bg-opacity-10 text-success">
+                            <i class="fa-solid fa-circle-check me-1"></i>수신 중
+                        </span>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 border rounded bg-light text-center h-100">
+                                <small class="text-muted d-block mb-1">온도 변화 폭</small>
+                                <div class="fw-bold fs-4 text-dark">
+                                    <span class="text-primary" id="tempMin">--</span>
+                                    <span class="text-muted mx-1">~</span>
+                                    <span class="text-danger" id="tempMax">--</span>
+                                </div>
+                                <small class="text-muted">최저 ~ 최고 (°C)</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 border rounded bg-light text-center h-100">
+                                <small class="text-muted d-block mb-1">습도 변화 폭</small>
+                                <div class="fw-bold fs-4 text-dark">
+                                    <span class="text-primary" id="humidMin">--</span>
+                                    <span class="text-muted mx-1">~</span>
+                                    <span class="text-info" id="humidMax">--</span>
+                                </div>
+                                <small class="text-muted">최저 ~ 최고 (%)</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-end">
+                        <small class="text-muted"><i class="fa-regular fa-clock me-1"></i>마지막 업데이트: <span id="lastUpdate">--:--:--</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-custom p-4">
+            <h5 class="fw-bold mb-4">📊 온/습도 변화 그래프</h5>
+            <div class="chart-wrapper">
+                <canvas id="sensorChart"></canvas>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+            <button id="btnComplete" class="btn btn-dark btn-lg px-5 shadow-lg">
+                <i class="fa-solid fa-check-double me-2"></i>배송 완료 처리
+            </button>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script th:inline="javascript">
+	        /*<![CDATA[*/
+	        
+	        // 1. 서버 데이터 바인딩 확인
+	        const deviceId = /*[[${deviceId}]]*/ 'UNKNOWN';
+	        const orderId = /*[[${orderId}]]*/ 0;
+	        
+	        // [디버깅 1] 초기화 값 확인
+	        console.log(`[AdminMonitor] [1] 초기화 - Device: ${deviceId}, Order: ${orderId}`);
+
+	        // 2. Chart.js 설정
+	        const ctx = document.getElementById('sensorChart').getContext('2d');
+	        const sensorChart = new Chart(ctx, {
+	            type: 'line',
+	            data: {
+	                labels: [], 
+	                datasets: [
+	                    {
+	                        label: '온도 (°C)',
+	                        data: [],
+	                        borderColor: '#dc3545', 
+	                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+	                        borderWidth: 3,
+	                        pointRadius: 3,
+	                        yAxisID: 'y',
+	                        tension: 0.3, 
+	                        fill: true							,
+												
+							showLine: true,   
+							spanGaps: true
+	                    },
+	                    {
+	                        label: '습도 (%)',
+	                        data: [],
+	                        borderColor: '#0d6efd',
+	                        backgroundColor: 'transparent',
+	                        borderWidth: 2,
+	                        pointRadius: 0,
+	                        borderDash: [5, 5],
+	                        yAxisID: 'y1',
+	                        tension: 0.3							,
+												
+							showLine: true,   
+							spanGaps: true
+	                    }
+	                ]
+	            },
+	            options: {
+	                responsive: true,
+	                maintainAspectRatio: false,
+	                animation: false,
+	                interaction: { mode: 'index', intersect: false },
+	                scales: {
+	                    x: { display: true },
+	                    y: { 
+	                        type: 'linear', display: true, position: 'left',
+	                        title: { display: true, text: '온도 (°C)' },
+	                        suggestedMin: 10, suggestedMax: 30
+	                    },
+	                    y1: { 
+	                        type: 'linear', display: true, position: 'right',
+	                        title: { display: true, text: '습도 (%)' },
+	                        grid: { drawOnChartArea: false },
+	                        suggestedMin: 30, suggestedMax: 80
+	                    }
+	                }
+	            }
+	        });
+
+	        // 3. SSE 연결 및 데이터 처리
+	        let eventSource = null;
+
+	        function connectSensor() {
+	            if(!deviceId || deviceId === 'UNKNOWN') {
+	                console.warn("[AdminMonitor] Device ID가 없어 연결을 중단합니다.");
+	                return;
+	            }
+
+	            const sseUrl = `/data/stream/${deviceId}`;
+	            console.log(`[AdminMonitor] [2] SSE 연결 시도: ${sseUrl}`);
+
+	            // SSE 연결
+	            eventSource = new EventSource(sseUrl);
+
+	            // [디버깅 3] 연결 성공 시
+	            eventSource.onopen = function() {
+	                console.log("[AdminMonitor] [3] SSE 연결 성공 (Connected)");
+	            };
+
+	            // [디버깅용] 이름 없는 이벤트 수신 확인 (혹시 백엔드에서 이름을 안 보냈을 경우 대비)
+	            eventSource.onmessage = function(event) {
+	                console.log("[AdminMonitor] [DEBUG] 이름 없는 메시지 수신:", event.data);
+	            };
+
+	            eventSource.addEventListener("newData", function(event) {
+	                // [디버깅 4] 데이터 수신 확인
+	                console.log("[AdminMonitor] [4] Raw Data 수신:", event.data);
+
+	                try {
+	                    const d = JSON.parse(event.data);
+	                    console.log("[AdminMonitor] [5] JSON 파싱 완료:", d);
+	                    
+	                    // (1) 현재 값 업데이트 (애니메이션 효과)
+	                    updateValue('currTemp', d.temperature?.toFixed(1));
+	                    updateValue('currHumid', d.humidity);
+
+	                    // (2) 통계 값 업데이트
+	                    if(d.maxTemperature != null) updateText('tempMax', d.maxTemperature.toFixed(1));
+	                    if(d.minTemperature != null) updateText('tempMin', d.minTemperature.toFixed(1));
+	                    
+	                    if(d.maxHumidity != null) updateText('humidMax', d.maxHumidity);
+	                    if(d.minHumidity != null) updateText('humidMin', d.minHumidity);
+
+	                    // (3) 시간 업데이트 및 차트 갱신
+	                    if(d.measuredAt) {
+	                        const timeOnly = d.measuredAt.split(' ')[1] || d.measuredAt;
+	                        updateText('lastUpdate', timeOnly);
+	                        
+	                        updateChart(timeOnly, d.temperature, d.humidity);
+	                        
+	                        // 이벤트 로그 기록
+	                        if (d.temperature != null && d.temperature > 10.0) {
+	                            addLog('경고', `온도 이탈 감지 (${d.temperature.toFixed(1)}°C)`, d.measuredAt);
+	                        }
+	                    }
+	                } catch (e) {
+	                    console.error("[AdminMonitor] ❌ 데이터 처리 중 에러:", e);
+	                }
+	            });
+
+	            eventSource.onerror = (err) => {
+	                console.error("[AdminMonitor] ❌ SSE 연결 끊김/에러:", err);
+	            };
+	        }
+
+	        // --- Helper Functions ---
+
+	        // 단순 텍스트 업데이트 (DOM 존재 여부 체크 포함)
+	        function updateText(id, val) {
+	            const el = document.getElementById(id);
+	            if(el) el.innerText = val;
+	            // else console.warn(`[AdminMonitor] DOM 요소 없음: ${id}`);
+	        }
+
+	        // 값 업데이트 시 깜빡임 효과 주는 함수
+	        function updateValue(elementId, value) {
+	            if(value == null) return;
+	            
+	            const el = document.getElementById(elementId);
+	            if(!el) {
+	                console.warn(`[AdminMonitor] DOM 요소 없음: ${elementId}`);
+	                return;
+	            }
+
+	            el.innerText = value;
+	            
+	            // 클래스 제거 후 재추가로 애니메이션 리셋
+	            el.classList.remove('flash');
+	            void el.offsetWidth; // 리플로우 강제
+	            el.classList.add('flash');
+	        }
+
+	        // 차트 데이터 추가 및 이동
+	        function updateChart(label, temp, humid) {
+	            sensorChart.data.labels.push(label);
+	            sensorChart.data.datasets[0].data.push(temp);
+	            sensorChart.data.datasets[1].data.push(humid);
+
+	            if(sensorChart.data.labels.length > 20) {
+	                sensorChart.data.labels.shift();
+	                sensorChart.data.datasets[0].data.shift();
+	                sensorChart.data.datasets[1].data.shift();
+	            }
+	            sensorChart.update();
+	        }
+
+	        // 로그 추가 함수
+	        function addLog(type, msg, fullTime) {
+	            const list = document.getElementById('eventLogList');
+	            if(!list) return; 
+
+	            const timeOnly = fullTime.split(' ')[1] || fullTime;
+
+	            let badgeClass = 'bg-secondary';
+	            if (type === '경고') badgeClass = 'bg-danger';
+	            if (type === '정상') badgeClass = 'bg-success';
+
+	            const li = document.createElement('li');
+	            li.className = "list-group-item d-flex justify-content-between px-0 animate__animated animate__fadeIn";
+	            
+	            li.innerHTML = `
+	                <span>
+	                    <span class="badge ${badgeClass} me-2">${type}</span>${msg}
+	                </span>
+	                <span class="text-muted small">${timeOnly}</span>
+	            `;
+
+	            list.prepend(li);
+	            
+	            if (list.children.length > 20) {
+	                list.removeChild(list.lastChild);
+	            }
+	        }
+
+	        // 4. 배송 완료 버튼 로직
+	        const btnComplete = document.getElementById('btnComplete');
+	        if(btnComplete) {
+	            btnComplete.addEventListener('click', function() {
+	                if(!confirm("배송을 완료 처리하고 모니터링을 종료하시겠습니까?")) return;
+
+	                console.log("[AdminMonitor] 배송 완료 요청 전송...");
+
+	                fetch(`/admin/orders/${orderId}/complete`, {
+	                    method: 'POST',
+	                    headers: { 'Content-Type': 'application/json' }
+	                })
+	                .then(res => {
+	                    if(res.ok) {
+	                        alert("✅ 배송이 완료되었습니다.");
+	                        if(eventSource) eventSource.close(); 
+	                        window.close(); 
+	                    } else {
+	                        alert("처리 실패. 다시 시도해주세요.");
+	                    }
+	                })
+	                .catch(err => console.error("[AdminMonitor] 완료 처리 중 에러:", err));
+	            });
+	        }
+			
+			connectSensor();
+
+	        /*]]>*/
+	    </script>
+		
+		<script th:inline="javascript">
+		  const dataList = /*[[${dataDTOList}]]*/ [];
+
+		  // sensorChart 초기화
+		  sensorChart.data.labels = [];
+		  sensorChart.data.datasets[0].data = []; // 온도
+		  sensorChart.data.datasets[1].data = []; // 습도
+
+		  if (Array.isArray(dataList) && dataList.length > 0) {
+
+		    // ✅ (추가) 시간 오름차순 정렬: 과거 -> 현재
+		    const sorted = [...dataList].sort((a, b) => {
+		      const ta = a.measuredAt ? Date.parse(a.measuredAt.replace(' ', 'T')) : -Infinity;
+		      const tb = b.measuredAt ? Date.parse(b.measuredAt.replace(' ', 'T')) : -Infinity;
+		      return ta - tb;
+		    });
+
+		    sorted.forEach(d => {
+		      const temp = Number(d.temperature);
+		      const humid = Number(d.humidity);
+		      if (!Number.isFinite(temp) || !Number.isFinite(humid)) return;
+
+		      const label =
+		        (d.measuredAt ? (d.measuredAt.split(' ')[1] || d.measuredAt)
+		                      : (d.regDate || ''));
+		      if (!label) return;
+
+		      sensorChart.data.labels.push(label);
+		      sensorChart.data.datasets[0].data.push(temp);
+		      sensorChart.data.datasets[1].data.push(humid);
+		    });
+
+		    const start = Math.max(0, sensorChart.data.labels.length - 20);
+		    sensorChart.data.labels = sensorChart.data.labels.slice(start);
+		    sensorChart.data.datasets[0].data = sensorChart.data.datasets[0].data.slice(start);
+		    sensorChart.data.datasets[1].data = sensorChart.data.datasets[1].data.slice(start);
+
+		    // ✅ (수정) last도 정렬된 기준으로 잡기
+		    const last = sorted[sorted.length - 1];
+		    const lastTemp = Number(last.temperature);
+		    const lastHumid = Number(last.humidity);
+
+		    if (Number.isFinite(lastTemp)) updateValue('currTemp', lastTemp.toFixed(1));
+		    if (Number.isFinite(lastHumid)) updateValue('currHumid', lastHumid);
+
+		    const lastLabel =
+		      (last.measuredAt ? (last.measuredAt.split(' ')[1] || last.measuredAt)
+		                       : (last.regDate || ''));
+		    if (lastLabel) updateText('lastUpdate', lastLabel);
+
+		    sensorChart.update();
+		  }
+		</script>
+
+		
+		<script th:inline="javascript">
+			/*<![CDATA[*/
+			const dataDTO = /*[[${dataDTO}]]*/ null;
+	
+			if (dataDTO) {
+			  if (dataDTO.minTemperature != null) updateText('tempMin', Number(dataDTO.minTemperature).toFixed(1));
+			  if (dataDTO.maxTemperature != null) updateText('tempMax', Number(dataDTO.maxTemperature).toFixed(1));
+	
+			  if (dataDTO.minHumidity != null) updateText('humidMin', dataDTO.minHumidity);
+			  if (dataDTO.maxHumidity != null) updateText('humidMax', dataDTO.maxHumidity);
+			}
+			/*]]>*/
+		</script>
+
+</body>
+</html>

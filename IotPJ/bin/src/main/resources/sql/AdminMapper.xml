@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.iot.web.mapper.AdminMapper">
+
+    <!-- 주문 정보 매핑 -->
+    <resultMap type="com.iot.web.domain.OrderInfoDTO" id="orderResultMap">
+        <id property="orderId" column="ORDER_ID" />
+        <result property="productId" column="PRODUCT_ID" />
+        <result property="sellerId" column="SELLER_ID" />
+        <result property="userId" column="USER_ID" />
+        <result property="deliveryId" column="DELIVERY_ID" />
+        <result property="orderedAt" column="ORDERED_AT" />
+        <result property="totalPrice" column="TOTAL_PRICE" />
+        <result property="isActive" column="IS_ACTIVE" />
+    </resultMap>
+
+    <!-- 디바이스 정보 매핑 -->
+    <resultMap type="com.iot.web.domain.DeviceInfoDTO" id="deviceResultMap">
+        <id property="deviceId" column="DEVICE_ID" />
+        <result property="deviceName" column="DEVICE_NAME" />
+        <result property="startDate" column="START_DATE" />
+        <result property="endDate" column="END_DATE" />
+        <result property="isActive" column="IS_ACTIVE" />
+        <result property="orderId" column="ORDER_ID" />
+    </resultMap>
+
+    <!-- 테스트 데이터 INSERT -->
+    <insert id="insertData">
+        INSERT INTO TEST_DATA (
+            DATA_CD
+          , DATA1
+          , DATA2
+          , DATA3
+          , SENSOR_CD
+        )
+        VALUES (
+            TEST_DATA_SEQ.NEXTVAL
+          , #{data1}
+          , #{data2}
+          , #{data3}
+          , #{sensorCd}
+        )
+    </insert>
+
+    <!-- 주문 목록 조회 -->
+    <select id="retrieveOrderData" resultMap="orderResultMap">
+        SELECT *
+          FROM ORDER_INFO
+    </select>
+    
+    <!--주문 상태 Y로 바꾸기-->
+    <update id="updateOrderIsActive" parameterType="String">
+        UPDATE ORDER_INFO
+        SET IS_ACTIVE = 'Y'
+        WHERE ORDER_ID = #{orderId}
+    </update>
+    
+    <!--주문 상태 Y로 바꾸기-->
+    <update id="updateOrderIsActiveFn" parameterType="String">
+        UPDATE ORDER_INFO
+        SET IS_ACTIVE = 'FN'
+        WHERE ORDER_ID = #{orderId}
+    </update>
+    
+
+    <!-- 특정 주문 ID로 주문 조회 -->
+    <select id="retrieveOrderDataForOrderId" resultMap="orderResultMap">
+        SELECT *
+          FROM ORDER_INFO
+         WHERE ORDER_ID = #{orderId}
+    </select>
+
+    <!-- 디바이스에 주문 연결 및 활성화 -->
+    <update id="updateDeviceId">
+        UPDATE DEVICE_INFO A
+           SET A.ORDER_ID   = #{orderId}
+             , A.IS_ACTIVE  = 'Y'
+             , A.START_DATE = #{startDate}
+         WHERE A.ROWID = (
+                SELECT ROWID
+                  FROM DEVICE_INFO
+                 WHERE IS_ACTIVE != 'Y'
+                   AND ROWNUM = 1
+               )
+    </update>
+
+    <!-- 주문에 연결된 디바이스 조회 -->
+    <select id="retrieveDeviceData" resultMap="deviceResultMap">
+        SELECT *
+          FROM DEVICE_INFO A
+         WHERE ORDER_ID = #{orderId}
+    </select>
+
+	<!-- ✅ 상품 등록 INSERT (IMAGE_URL 추가 버전) -->
+	<insert id="insertProduct" parameterType="com.iot.web.domain.ProductInfoDTO">
+	    INSERT INTO PRODUCT_INFO (
+	        PRODUCT_ID
+	      , SELLER_ID
+	      , PRODUCT_NAME
+	      , PRICE
+	      , MIN_TEMPERATURE
+	      , MAX_TEMPERATURE
+	      , MIN_HUMIDITY
+	      , MAX_HUMIDITY
+	      , IMAGE_URL          <!-- ★ 추가 -->
+	    )
+	    VALUES (
+	        PRODUCT_INFO_SEQ.NEXTVAL
+	      , #{sellerId}
+	      , #{productName}
+	      , #{price}
+	      , #{minTemperature}
+	      , #{maxTemperature}
+	      , #{minHumidity}
+	      , #{maxHumidity}
+	      , #{imageUrl}        <!-- ★ 여기서 DTO의 imageUrl 값이 들어감 -->
+	    )
+	</insert>
+
+
+</mapper>

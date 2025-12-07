@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <title>관리자 | 상품 등록</title>
+  <link rel="stylesheet" href="/css/base.css" />
+</head>
+<body class="app-body">
+<div class="app-shell">
+
+  <!-- 상단 헤더 -->
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">상품 등록</h1>
+      <p class="page-subtitle">
+        센서 모니터링 대상 상품의 기본 정보와 임계 온·습도를 설정합니다.
+      </p>
+    </div>
+    <div class="page-header-actions">
+      <a class="btn secondary" href="/admin/products">목록으로</a>
+    </div>
+  </header>
+
+  <!-- 등록 폼 카드 -->
+  <section class="card">
+    <!-- ★ enctype 추가 -->
+    <form id="productForm" class="form-grid" enctype="multipart/form-data">
+      <!-- 셀러 ID -->
+      <div class="form-field">
+        <label class="form-label">셀러 ID <span class="required">*</span></label>
+        <input
+          type="text"
+          id="sellerId"
+          name="sellerId"
+          class="input"
+          placeholder="예) SELLER01"
+          required
+        />
+      </div>
+
+      <!-- 상품명 -->
+      <div class="form-field">
+        <label class="form-label">상품명 <span class="required">*</span></label>
+        <input
+          type="text"
+          id="productName"
+          name="productName"
+          class="input"
+          placeholder="예) 아이스크림"
+          required
+        />
+      </div>
+
+      <!-- 가격 -->
+      <div class="form-field">
+        <label class="form-label">가격(원) <span class="required">*</span></label>
+        <input
+          type="number"
+          id="price"
+          name="price"
+          class="input"
+          min="0"
+          step="10"
+          placeholder="예) 1200"
+          required
+        />
+      </div>
+
+      <!-- 온도 임계치 -->
+      <div class="form-field">
+        <label class="form-label">온도 임계치(℃)</label>
+        <div class="field-inline">
+          <input
+            type="number"
+            id="minTemperature"
+            name="minTemperature"
+            class="input"
+            placeholder="최소"
+          />
+          <span class="field-separator">~</span>
+          <input
+            type="number"
+            id="maxTemperature"
+            name="maxTemperature"
+            class="input"
+            placeholder="최대"
+          />
+        </div>
+      </div>
+
+      <!-- 습도 임계치 -->
+      <div class="form-field">
+        <label class="form-label">습도 임계치(%)</label>
+        <div class="field-inline">
+          <input
+            type="number"
+            id="minHumidity"
+            name="minHumidity"
+            class="input"
+            placeholder="최소"
+          />
+          <span class="field-separator">~</span>
+          <input
+            type="number"
+            id="maxHumidity"
+            name="maxHumidity"
+            class="input"
+            placeholder="최대"
+          />
+        </div>
+      </div>
+
+      <!-- ★ 상품 이미지 업로드 -->
+      <div class="form-field">
+        <label class="form-label">상품 이미지</label>
+        <input
+          type="file"
+          id="imageFile"
+          name="imageFile"
+          class="input"
+          accept="image/*"
+        />
+        <p class="field-help">jpg, png 등의 이미지를 업로드하세요.</p>
+      </div>
+
+      <!-- 메시지 영역 -->
+      <p id="msg" class="form-message"></p>
+
+      <!-- 버튼 -->
+      <div class="form-actions">
+        <button type="button" class="btn secondary" onclick="history.back()">취소</button>
+        <button type="submit" class="btn">등록</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<!-- JS 연결 -->
+<script type="module" src="/js/pages/adminProductNew.js"></script>
+</body>
+</html>

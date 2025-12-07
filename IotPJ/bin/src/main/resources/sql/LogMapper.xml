@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.iot.web.mapper.LogMapper">
+
+    <resultMap id="logResultMap" type="com.iot.web.domain.AlarmLogDTO">
+	    <id     property="logId"        column="LOG_ID"/>
+	    <result property="deliveryId"   column="DELIVERY_ID"/>
+	    <result property="orderId"      column="ORDER_ID"/>
+	    <result property="deviceId"     column="DEVICE_ID"/>
+	    <result property="loggedAt"     column="LOGGED_AT"/>
+	    <result property="isChecked"    column="IS_CHECKED"/>
+	    <result property="adminChecked" column="ADMIN_CHECKED"/>
+	    <result property="sensorData"   column="SENSOR_DATA"/>
+	    <result property="logCd"        column="LOG_CODE"/>
+	    <result property="userId"       column="USER_ID"/>
+	</resultMap>
+	
+	<resultMap id="logSummaryMap" type="com.iot.web.domain.AlarmLogDTO">
+	    <result property="resultDay" column="RESULTDAY"/>
+	    <result property="resultCnt" column="RESULTCNT"/>
+	</resultMap>
+
+    <insert id="insertLog">
+        INSERT INTO ALARM_LOG (
+            LOG_ID
+          , DELIVERY_ID
+          , ORDER_ID
+          , DEVICE_ID
+          , LOGGED_AT
+          , SENSOR_DATA
+          , LOG_CODE
+          , USER_ID
+        )
+        VALUES (
+            LOG_SEQ.NEXTVAL
+          , #{logDTO.deliveryId}
+          , #{logDTO.orderId}
+          , #{logDTO.deviceId}
+          , #{logDTO.loggedAt}
+          , #{logDTO.sensorData}
+          , #{logDTO.logCd}
+          , #{logDTO.userId}
+        )
+    </insert>
+
+	<select id="retrieveErrData" resultMap="logSummaryMap">
+	<![CDATA[
+        SELECT SUBSTR(A.LOGGED_AT, 1, 10) AS RESULTDAY,
+           COUNT(DISTINCT A.USER_ID)      AS RESULTCNT
+         FROM ALARM_LOG A
+         WHERE A.LOGGED_AT >= #{startDate}
+           AND A.LOGGED_AT <  #{endDate}  
+           AND A.LOG_CODE = '2'
+      GROUP BY SUBSTR(A.LOGGED_AT, 1, 10)
+      ORDER BY resultDay
+    ]]>
+    </select>
+    
+    <select id="retrieveAllDataForUserId" resultMap="logResultMap">
+	    SELECT *
+          FROM ALARM_LOG A
+         WHERE A.USER_ID  = #{userId}  
+           AND A.LOG_CODE = '2'
+      ORDER BY LOGGED_AT DESC
+    </select>
+
+</mapper>

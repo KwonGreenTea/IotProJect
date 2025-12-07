@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알림 센터 | MERRY SHOP</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --xmas-red: #D42426;
+            --xmas-dark: #1A1A1A;
+            --xmas-bg: #F8F9FA;
+        }
+
+        body {
+            background-color: var(--xmas-bg);
+            color: var(--xmas-dark);
+            padding-bottom: 80px;
+        }
+
+        .navbar-custom { background-color: var(--xmas-red); }
+        .navbar-brand, .nav-link { color: white !important; font-weight: 600; }
+
+        .notification-card {
+            border-left: 5px solid var(--xmas-red);
+            background: #fff;
+            transition: box-shadow 0.2s;
+        }
+        .notification-card:hover {
+            box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+        }
+
+        .notif-time {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .mobile-bottom-nav {
+            background-color: white;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .mobile-nav-item {
+            color: var(--xmas-dark);
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+        .mobile-nav-item.active { color: var(--xmas-red); }
+    </style>
+</head>
+
+<body>
+
+    <!-- 상단 네비게이션 -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fa-solid fa-snowflake me-2"></i>MERRY SHOP</a>
+            <div class="collapse navbar-collapse d-none d-lg-block" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+					<!--<li class="nav-item"><a class="nav-link" href="#">검색</a></li>-->
+					<li class="nav-item"><a class="nav-link" href="/order/notifications"><i class="fa-solid fa-bell me-1"></i>알림</a></li>
+					<li class="nav-item"><a class="nav-link" href="/order/list">주문 목록</a></li>
+					<!--<li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-cart-shopping me-1"></i>장바구니</a></li>-->
+					<!--<li class="nav-item"><a class="nav-link btn btn-dark text-white ms-3 px-3 rounded-pill" href="#">로그아웃</a></li>-->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 본문 -->
+    <div class="container py-4">
+        <h3 class="fw-bold border-start border-4 border-danger ps-3 mb-4">알림 센터</h3>
+
+        <!-- 알림 비어있을 때 -->
+        <div th:if="${#lists.isEmpty(notifyList)}" class="text-center py-5 text-muted">
+            <i class="fa-solid fa-bell-slash fa-3x mb-3"></i>
+            <p>현재 도착한 알림이 없습니다.</p>
+        </div>
+
+        <!-- 알림 리스트 -->
+        <div class="row g-3" th:each="n : ${notifyList}">
+            <div class="col-12">
+                <div class="p-3 rounded notification-card d-flex justify-content-between align-items-start">
+                    <div>
+						<h5 class="mb-1">
+						    <i class="fa-solid fa-bell text-danger me-2"></i>
+						    <span th:text="'주문 ' + ${n.orderId} + ' 이상 감지'">알림 제목</span>
+						</h5>
+
+						<p class="mb-1" th:text="${n.sensorData}">
+						    알림 상세 메시지 텍스트
+						</p>
+						
+						<span class="notif-time" th:text="${n.loggedAt}">
+						    2025-12-05 14:00
+						</span>
+
+                    </div>
+
+                    <div>
+                        <a class="btn btn-outline-danger btn-sm px-3"
+                           th:href="@{/order/monitor/{id}(id=${n.orderId})}">
+                            보기
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 모든 알림 읽음 처리 -->
+        <div class="text-center mt-4">
+            <a href="/notifications/readAll" class="btn btn-secondary px-4">
+                모든 알림 읽음 처리
+            </a>
+        </div>
+    </div>
+
+    <!-- 모바일 하단 네비게이션 -->
+    <nav class="mobile-bottom-nav fixed-bottom d-lg-none">
+        <div class="container-fluid">
+            <div class="row text-center py-2">
+                <div class="col-3">
+                    <a href="/" class="mobile-nav-item d-flex flex-column align-items-center">
+                        <i class="fa-solid fa-house fs-5 mb-1"></i><span>홈</span>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="#" class="mobile-nav-item d-flex flex-column align-items-center">
+                        <i class="fa-solid fa-magnifying-glass fs-5 mb-1"></i><span>검색</span>
+                    </a>
+                </div>
+				<div class="col-3">
+				    <a href="/order/notifications" class="mobile-nav-item d-flex flex-column align-items-center">
+				        <i class="fa-solid fa-magnifying-glass fs-5 mb-1"></i><span>알림</span>
+				     </a>
+				</div>
+                <div class="col-3">
+                    <a href="/orders" class="mobile-nav-item d-flex flex-column align-items-center">
+                        <i class="fa-solid fa-list-check fs-5 mb-1"></i><span>주문</span>
+                    </a>
+                </div>
+                <div class="col-3">
+                    <a href="/cart" class="mobile-nav-item d-flex flex-column align-items-center">
+                        <i class="fa-solid fa-cart-shopping fs-5 mb-1"></i><span>장바구니</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

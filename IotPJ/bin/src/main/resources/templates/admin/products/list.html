@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>관리자 | 상품 목록</title>
+  <!-- 관리자 영역은 base.css 사용 -->
+  <link rel="stylesheet" href="/css/base.css" />
+  <script type="module">
+    import { fetchProducts } from "/js/shop.js";
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      const res = await fetchProducts();
+      const root = document.querySelector('#root');
+
+      if (res.length === 0) {
+        root.innerHTML = `
+          <div class="empty-state">
+            <p class="empty-title">등록된 상품이 없습니다.</p>
+            <p class="empty-desc">
+              우측 상단의 <b>상품 등록</b> 버튼을 눌러 첫 상품을 등록해 보세요.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      root.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr>
+              <th>이름</th>
+              <th>가격</th>
+              <th>임계(℃ / %)</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${res
+              .map(
+                (p) => `
+              <tr>
+                <td>${p.name}</td>
+                <td>${Number(p.price || 0).toLocaleString()}원</td>
+                <td>${p.thresholdTemp ?? '-'} / ${p.thresholdHumid ?? '-'}</td>
+                <td>
+                  <a href="/shop/${p.id}" class="link-inline">상세</a>
+                </td>
+              </tr>
+            `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      `;
+    });
+  </script>
+</head>
+<body class="app-body">
+  <div class="app-shell">
+
+    <!-- 상단 헤더 -->
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">상품 목록 (관리자)</h1>
+        <p class="page-subtitle">
+          등록된 상품 정보와 임계 온·습도 설정을 한눈에 확인할 수 있습니다.
+        </p>
+      </div>
+      <div class="page-header-actions">
+        <a class="btn btn-soft" href="/admin/orders">주문 관리</a>
+        <a class="btn btn-primary" href="/admin/products/new">상품 등록</a>
+      </div>
+    </header>
+
+    <!-- 리스트 카드 -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">상품 목록</h2>
+          <p class="card-subtitle">
+            센서 모니터링 대상 상품의 가격과 임계값을 관리합니다.
+          </p>
+        </div>
+      </div>
+
+      <div id="root" class="table-wrapper">
+        <!-- JS에서 테이블 또는 empty-state 렌더 -->
+      </div>
+    </section>
+  </div>
+</body>
+</html>

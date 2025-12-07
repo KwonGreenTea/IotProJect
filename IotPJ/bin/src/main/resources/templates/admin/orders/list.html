@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>신규 주문 처리 | Fresh Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 관리자 공통 스타일 */
+        body { background-color: #F5F7FB; font-family: 'Noto Sans KR', sans-serif; }
+        
+        /* 사이드바 */
+        .sidebar {
+            width: 260px; height: 100vh;
+            background: #212529; color: #fff;
+            position: fixed; top: 0; left: 0;
+            padding-top: 20px; z-index: 1000;
+        }
+        .sidebar .nav-link { color: #adb5bd; padding: 15px 25px; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #fff; background-color: #D42426;
+        }
+        .brand-logo {
+            font-size: 1.5rem; font-weight: bold; color: #fff;
+            text-align: center; margin-bottom: 30px; text-decoration: none; display: block;
+        }
+
+        /* 메인 영역 */
+        .main-content { margin-left: 260px; padding: 30px; }
+
+        /* 테이블 스타일 */
+        .table-card {
+            background: white; border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: none; overflow: hidden;
+        }
+        .table thead th {
+            background-color: #f1f3f5; border-bottom: 2px solid #dee2e6;
+            color: #495057; font-weight: 700; padding: 16px;
+        }
+        .table tbody td {
+            vertical-align: middle; padding: 16px; font-size: 0.95rem;
+        }
+
+        /* [핵심] 상태별 행 스타일 */
+        /* 배송 중(완료된 업무)은 배경을 약간 어둡게 처리하여 시선 분산 방지 */
+        tr.row-shipping { background-color: #f8f9fa; }
+        tr.row-shipping td { color: #868e96; }
+        
+        /* 신규 주문(해야 할 업무)은 흰색 배경 유지 + 텍스트 진하게 */
+        tr.row-new { background-color: #ffffff; }
+        tr.row-new td { color: #212529; }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <a href="/admin" class="brand-logo"><i class="fa-solid fa-temperature-low me-2"></i>Fresh Admin</a>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="/admin"><i class="fa-solid fa-chart-pie me-3"></i>대시보드</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/admin/orders"><i class="fa-solid fa-truck-fast me-3"></i>주문 목록</a>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-users me-3"></i>회원 관리</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-gear me-3"></i>설정</a></li>
+        </ul>
+        <div class="mt-auto p-4" style="position: absolute; bottom: 0; width: 100%;">
+            <a href="/logout" class="btn btn-outline-light w-100 btn-sm">로그아웃</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark">📦 주문 접수 현황</h2>
+                <p class="text-muted mb-0">신규 주문을 확인하고 <strong class="text-primary">배송 시작</strong> 처리를 진행하세요.</p>
+            </div>
+            <div class="d-flex gap-3">
+                <div class="bg-white px-3 py-2 rounded shadow-sm border">
+                    <small class="text-muted d-block">처리 대기</small>
+                    <strong class="text-primary fs-5" id="pendingCount">-</strong> 건
+                </div>
+            </div>
+        </header>
+
+        <div class="card table-card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle" id="orderTable">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Order ID</th>
+                                <th>구매자 (User)</th>
+                                <th>주문 상품</th>
+                                <th>주문 일시</th>
+                                <th class="text-end">금액</th>
+                                <th class="text-center">상태</th>
+                                <th class="text-center">작업 (Action)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <tr th:if="${#lists.isEmpty(orderList)}">
+                                <td colspan="7" class="text-center py-5">
+                                    <p class="text-muted mb-0">현재 접수된 주문이 없습니다.</p>
+                                </td>
+                            </tr>
+
+                            <tr th:each="order : ${orderList}" 
+                                th:class="${order.isActive != 'Y'} ? 'row-new' : 'row-shipping'"
+                                th:data-status="${order.isActive != 'Y'} ? 'NEW' : 'SHIPPING'">
+                                
+                                <td class="text-center fw-bold" th:text="|#${order.orderId}|">#101</td>
+                                
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded-circle p-2 me-2 text-secondary">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <strong th:text="${order.userId}">user01</strong>
+                                            <div class="small text-muted" th:if="${order.isActive == 'Y'}" th:text="|운송장: ${order.deliveryId}|"></div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-light text-dark border me-1">ID: <span th:text="${order.productId}"></span></span>
+                                    <small class="text-muted"><i class="fa-solid fa-store ms-1 me-1"></i><span th:text="${order.sellerId}"></span></small>
+                                </td>
+
+                                <td th:text="${order.orderedAt}">2023-11-27</td>
+
+                                <td class="text-end fw-bold">
+                                    <span th:text="${#numbers.formatInteger(order.totalPrice, 0, 'COMMA')}">30,000</span>원
+                                </td>
+
+                                <td class="text-center">
+                                    <span th:unless="${order.isActive == 'Y'}" class="badge bg-primary rounded-pill px-3">
+                                        신규 주문
+                                    </span>
+                                    <span th:if="${order.isActive == 'Y'}" class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill px-3">
+                                        배송 중
+                                    </span>
+                                </td>
+
+                                <td class="text-center">
+                                    
+									<button th:unless="${order.isActive == 'Y'}"
+									        class="btn btn-primary btn-sm shadow-sm fw-bold px-3"
+									        th:onclick="|startShipping(${order.orderId}, this)|">
+									    <i class="fa-solid fa-box-open me-1"></i> 배송 시작
+									</button>
+
+                                    <button th:if="${order.isActive == 'Y'}"
+                                            class="btn btn-outline-secondary btn-sm px-3" 
+                                            th:onclick="|openMonitor(${order.orderId})|">
+                                        <i class="fa-solid fa-desktop me-1"></i> 모니터링
+                                    </button>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 1. 페이지 로드 시 '신규 주문'을 상단으로 정렬하는 함수
+        document.addEventListener("DOMContentLoaded", function() {
+            const table = document.getElementById("orderTable");
+            const tbody = table.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+
+            // 데이터가 없으면 패스
+            if(rows.length === 0 || rows[0].cells.length < 2) return;
+
+            // 정렬 로직: data-status가 'NEW'인 것을 앞으로, 'SHIPPING'을 뒤로
+            rows.sort((a, b) => {
+                const statusA = a.getAttribute('data-status');
+                const statusB = b.getAttribute('data-status');
+
+                // NEW가 SHIPPING보다 우선
+                if (statusA === 'NEW' && statusB !== 'NEW') return -1;
+                if (statusA !== 'NEW' && statusB === 'NEW') return 1;
+                return 0; // 같으면 순서 유지 (보통 최신순일 테니)
+            });
+
+            // 정렬된 순서대로 다시 append
+            rows.forEach(row => tbody.appendChild(row));
+
+            // 신규 주문 건수 카운트해서 상단 헤더에 표시
+            const newCount = rows.filter(r => r.getAttribute('data-status') === 'NEW').length;
+            document.getElementById('pendingCount').innerText = newCount;
+        });
+
+        // 2. 배송 시작 요청 (Fetch)
+		// [기존] 배송 시작 요청 함수 수정
+		    function startShipping(orderId, btnElement) {
+		        // 1. 확인 절차
+		        if (!confirm(`[주문 #${orderId}] 배송을 시작하시겠습니까?`)) {
+		            return;
+		        }
+
+		        // 2. 서버에 상태 변경 요청 (POST) - SSE 아님!
+		        fetch(`/admin/orders/${orderId}/ship`, {
+		            method: 'POST',
+		            headers: { 'Content-Type': 'application/json' }
+		        })
+		        .then(res => {
+		            if (res.ok) {
+		                // 성공 시 알림 (선택사항, 너무 자주 뜨면 귀찮을 수 있음)
+		                // alert("배송이 시작되었습니다.");
+
+		                // 3. [핵심] 화면 새로고침 없이 '버튼'과 '상태 배지'만 교체 (Button Switching)
+		                
+		                // (1) 해당 행(tr) 찾기
+		                const row = btnElement.closest('tr');
+		                
+		                // (2) 배경색 및 텍스트 스타일 변경 (신규 -> 배송중 스타일)
+		                row.classList.remove('row-new');
+		                row.classList.add('row-shipping');
+		                row.setAttribute('data-status', 'SHIPPING');
+
+		                // (3) 상태 배지 변경 (신규 주문 -> 배송 중)
+		                const statusCell = row.cells[5]; // 6번째 칸(인덱스 5)이 상태 칸이라고 가정
+		                statusCell.innerHTML = `
+		                    <span class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill px-3">
+		                        배송 중
+		                    </span>
+		                `;
+
+		                // (4) 버튼 교체 (배송 시작 -> 모니터링)
+		                const actionCell = row.cells[6]; // 7번째 칸(인덱스 6)이 액션 칸
+		                actionCell.innerHTML = `
+		                    <button class="btn btn-outline-secondary btn-sm px-3" 
+		                            onclick="openMonitor(${orderId})">
+		                        <i class="fa-solid fa-desktop me-1"></i> 모니터링
+		                    </button>
+		                `;
+
+		                // (옵션) 상단 통계 숫자 줄이기
+		                const countElem = document.getElementById('pendingCount');
+		                let count = parseInt(countElem.innerText);
+		                if(count > 0) countElem.innerText = count - 1;
+
+		            } else {
+		                alert("처리 실패. 다시 시도해주세요.");
+		            }
+		        })
+		        .catch(err => {
+		            console.error(err);
+		            alert("서버 오류가 발생했습니다.");
+		        });
+		    }
+
+		    // 모니터링 화면 열기 (여기서 비로소 SSE 연결됨)
+		    function openMonitor(orderId) {
+		        const url = `/admin/orders/${orderId}`;
+		        window.open(url, '_blank', 'width=1280,height=900');
+		    }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
