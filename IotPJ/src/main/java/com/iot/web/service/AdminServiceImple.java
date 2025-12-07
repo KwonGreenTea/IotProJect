@@ -33,6 +33,12 @@ public class AdminServiceImple implements AdminService {
 	}
 
     @Override
+	public int updateOrderIsActiveFn(String orderId) {
+    	return adminMapper.updateOrderIsActiveFn(orderId);
+	}
+
+    
+    @Override
     public void updateDeviceId(String orderId, String startDate) {
         adminMapper.updateDeviceId(orderId, startDate);
     }
@@ -55,5 +61,6 @@ public class AdminServiceImple implements AdminService {
         adminMapper.insertProduct(dto);
     }
 
+	
 	
 }

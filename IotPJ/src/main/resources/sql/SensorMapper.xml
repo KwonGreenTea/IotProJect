@@ -89,6 +89,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           FROM ORDER_INFO A
 		 WHERE A.ORDER_ID = ${orderId}
 	</select>
+	
+	<select id="selectDevicesNoDataForSeconds" resultType="java.lang.String">
+	<![CDATA[
+		SELECT A.DEVICE_ID
+          FROM SENSOR_DATA_REALTIME A, DEVICE_INFO B, ORDER_INFO C
+         WHERE A.DEVICE_ID = B.DEVICE_ID
+           AND B.ORDER_ID = C.ORDER_ID
+      GROUP BY A.DEVICE_ID
+        HAVING MAX(TO_DATE(A.MEASURED_AT, 'YYYY-MM-DD HH24:MI:SS'))
+           < SYSDATE - NUMTODSINTERVAL(#{seconds}, 'SECOND')
+    ]]>
+	</select>
 
 </mapper>
 

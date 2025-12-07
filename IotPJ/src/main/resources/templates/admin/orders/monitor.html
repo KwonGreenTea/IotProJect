@@ -421,7 +421,7 @@
 
 	                console.log("[AdminMonitor] 배송 완료 요청 전송...");
 
-	                fetch(`/api/admin/orders/${orderId}/complete`, {
+	                fetch(`/admin/orders/${orderId}/complete`, {
 	                    method: 'POST',
 	                    headers: { 'Content-Type': 'application/json' }
 	                })

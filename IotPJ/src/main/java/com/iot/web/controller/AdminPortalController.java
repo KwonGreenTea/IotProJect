@@ -105,6 +105,9 @@ public class AdminPortalController {
     /** 운영자 주문 상세/모니터 */
     @GetMapping("/admin/orders/{orderId}")
     public String adminOrderMonitor(Model model, @PathVariable String orderId) {
+    	OrderInfoDTO orderInfoDTO = null;
+    	List<SensorDataRealtimeDTO> dataDTOList = null;
+        SensorDataRealtimeDTO dataDTO = null;
         // 현재 활성화 되지 않은 센서(장비)에 orderId를 맵핑
         String startDate = getSysDt();
         log.info("orderId : " + orderId);
@@ -114,37 +117,52 @@ public class AdminPortalController {
         // orderId에 대한 센서(장비) 데이터 정보
         DeviceInfoDTO deviceInfoDTO = adminService.retrieveDeviceData(orderId);
         log.info("retrieveDeviceData 완료");
-        log.info("deviceInfoDTO 장비 정보 : " + deviceInfoDTO.toString());
+        
+        if(deviceInfoDTO != null) {
+        	 log.info("deviceInfoDTO 장비 정보 : " + deviceInfoDTO.toString());
 
-        // orderId에 대한 주문 데이터 정보
-        OrderInfoDTO orderInfoDTO = adminService.retrieveOrderDataForOrderId(orderId);
+             // orderId에 대한 주문 데이터 정보
+             orderInfoDTO = adminService.retrieveOrderDataForOrderId(orderId);
 
-        String deviceId = deviceInfoDTO.getDeviceId();
+             String deviceId = deviceInfoDTO.getDeviceId();
 
-        // 센서 데이터 불러옴
-        List<SensorDataRealtimeDTO> dataDTOList = sensorService.retrieveDataList(deviceId);
-        SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
+             // 센서 데이터 불러옴
+             dataDTOList = sensorService.retrieveDataList(deviceId);
+             dataDTO = new SensorDataRealtimeDTO();
 
-        if (dataDTOList != null && !dataDTOList.isEmpty()) {
-            SensorDataRealtimeDTO firstData = dataDTOList.get(0);
-            dataDTO.setMaxTemperature(firstData.getMaxTemperature());
-            dataDTO.setMaxHumidity(firstData.getMaxHumidity());
-            dataDTO.setMinTemperature(firstData.getMinTemperature());
-            dataDTO.setMinHumidity(firstData.getMinHumidity());
+             if (dataDTOList != null && !dataDTOList.isEmpty()) {
+                 SensorDataRealtimeDTO firstData = dataDTOList.get(0);
+                 dataDTO.setMaxTemperature(firstData.getMaxTemperature());
+                 dataDTO.setMaxHumidity(firstData.getMaxHumidity());
+                 dataDTO.setMinTemperature(firstData.getMinTemperature());
+                 dataDTO.setMinHumidity(firstData.getMinHumidity());
+             }
+
+             log.info("deviceInfoDTO : {}", deviceInfoDTO);
+             log.info("orderInfoDTO : {}", orderInfoDTO);
+             
+             model.addAttribute("dataDTO", dataDTO);
+             model.addAttribute("dataDTOList", dataDTOList);
+             model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
         }
 
-        log.info("deviceInfoDTO : {}", deviceInfoDTO);
-        log.info("orderInfoDTO : {}", orderInfoDTO);
-
         model.addAttribute("deviceInfoDTO", deviceInfoDTO);
-        model.addAttribute("deviceId", deviceInfoDTO.getDeviceId());
         model.addAttribute("orderInfoDTO", orderInfoDTO);
-        model.addAttribute("dataDTO", dataDTO);
-        model.addAttribute("dataDTOList", dataDTOList);
 
         return "admin/orders/monitor";
     }
 
+    // 배송종료
+    @PostMapping("/admin/orders/${orderId}/complete")
+    public ResponseEntity<String> adminProductEnd(@PathVariable String orderId) {
+    	log.info("배송 종료 요청 받음: Order ID {}", orderId);
+
+        adminService.updateOrderIsActiveFn(orderId);
+        
+        return ResponseEntity.ok("배송이 종료 되었습니다.");
+    }
+    
+    
     /** 운영자 상품 목록 */
     @GetMapping("/admin/products")
     public String adminProducts() {

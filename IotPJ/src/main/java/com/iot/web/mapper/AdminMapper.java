@@ -23,4 +23,6 @@ public interface AdminMapper {
 	OrderInfoDTO retrieveOrderDataForOrderId(String orderId);
 
 	void insertProduct(ProductInfoDTO product);
+
+	int updateOrderIsActiveFn(String orderId);
 }

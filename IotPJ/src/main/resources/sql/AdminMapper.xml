@@ -58,6 +58,13 @@
         WHERE ORDER_ID = #{orderId}
     </update>
     
+    <!--주문 상태 Y로 바꾸기-->
+    <update id="updateOrderIsActiveFn" parameterType="String">
+        UPDATE ORDER_INFO
+        SET IS_ACTIVE = 'FN'
+        WHERE ORDER_ID = #{orderId}
+    </update>
+    
 
     <!-- 특정 주문 ID로 주문 조회 -->
     <select id="retrieveOrderDataForOrderId" resultMap="orderResultMap">

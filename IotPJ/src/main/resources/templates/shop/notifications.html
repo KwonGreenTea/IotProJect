@@ -60,10 +60,11 @@
             <a class="navbar-brand" href="/"><i class="fa-solid fa-snowflake me-2"></i>MERRY SHOP</a>
             <div class="collapse navbar-collapse d-none d-lg-block" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#">검색</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">주문 목록</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-cart-shopping me-1"></i>장바구니</a></li>
-                    <li class="nav-item"><a class="nav-link btn btn-dark text-white ms-3 px-3 rounded-pill" href="#">로그아웃</a></li>
+					<!--<li class="nav-item"><a class="nav-link" href="#">검색</a></li>-->
+					<li class="nav-item"><a class="nav-link" href="/order/notifications"><i class="fa-solid fa-bell me-1"></i>알림</a></li>
+					<li class="nav-item"><a class="nav-link" href="/order/list">주문 목록</a></li>
+					<!--<li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-cart-shopping me-1"></i>장바구니</a></li>-->
+					<!--<li class="nav-item"><a class="nav-link btn btn-dark text-white ms-3 px-3 rounded-pill" href="#">로그아웃</a></li>-->
                 </ul>
             </div>
         </div>
@@ -89,11 +90,9 @@
 						    <span th:text="'주문 ' + ${n.orderId} + ' 이상 감지'">알림 제목</span>
 						</h5>
 
-						<!--
 						<p class="mb-1" th:text="${n.sensorData}">
 						    알림 상세 메시지 텍스트
 						</p>
-						-->
 						
 						<span class="notif-time" th:text="${n.loggedAt}">
 						    2025-12-05 14:00

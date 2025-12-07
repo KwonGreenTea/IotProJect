@@ -49,6 +49,8 @@ public class SseEmitterManager {
     			//e.printStackTrace();
     			log.warn("OrderId = " + orderId + "의 대한 로그 데이터 INSERT 실패");
     		}     
+            
+            json = "현재 최고 온도 : " + dataDTO.getMaxHumidity() + "\n최고 습도 : " + dataDTO.getMaxHumidity() + "\n최저 온도 : " + dataDTO.getMinTemperature() + "\n최저 습도 : " + dataDTO.getMinHumidity();
     		
     		CopyOnWriteArrayList<SseEmitter> deviceEmitters = alertEmitters.get(userId);
 

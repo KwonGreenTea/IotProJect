@@ -13,6 +13,8 @@ public interface AdminService {
     
     int updateOrderIsActive(String orderId);
     
+    int updateOrderIsActiveFn(String orderId);
+    
     void updateDeviceId(String orderId, String startDate);
 
     DeviceInfoDTO retrieveDeviceData(String orderId);
@@ -21,4 +23,6 @@ public interface AdminService {
 
     // 상품 등록 관련
     void createProduct(ProductInfoDTO dto);
+
+	
 }
