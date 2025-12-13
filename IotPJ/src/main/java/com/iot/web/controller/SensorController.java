@@ -87,8 +87,8 @@ public class SensorController {
         SensorDataRealtimeDTO dataDTO = new SensorDataRealtimeDTO();
         dataDTO.setDeviceId(deviceId);
         dataDTO.setMeasuredAt(getSysDt());
-        dataDTO.setTemperature(Double.parseDouble((String) jsonData.get("temperature")));
-        dataDTO.setHumidity(Integer.parseInt((String) jsonData.get("humidity")));
+        dataDTO.setTemperature(Double.parseDouble(jsonData.get("temperature").toString()));
+        dataDTO.setHumidity(Integer.parseInt((String) jsonData.get("humidity").toString()));
         
         sensorService.insertData(dataDTO);
         log.info("insertData() 완료" );
